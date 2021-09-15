@@ -1,0 +1,36 @@
+{
+  "name": "@waves/provider-metamask",
+  "version": "0.0.2",
+  "main": "dist/provider-metamask.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wavesplatform/provider-metamask"
+  },
+  "bugs": {
+    "url": "https://github.com/wavesplatform/provider-metamask/issues"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "watch": "webpack --watch",
+    "build": "webpack",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@types/ramda": "^0.26.38",
+    "@metamask/onboarding": "^1.0.1",
+    "@waves/node-api-js": "^1.2.3",
+    "@waves/signer": "1.0.2",
+    "@waves/ts-types": "^0.3.0",
+    "@waves/waves-transactions": "^4.2.1"
+  },
+  "devDependencies": {
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.4",
+    "webpack": "^4.41.4",
+    "webpack-cli": "^3.3.10"
+  }
+}
+
