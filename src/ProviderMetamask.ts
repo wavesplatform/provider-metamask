@@ -74,15 +74,15 @@ export class ProviderMetamask implements Provider {
     }
 
     public async signAndBroadCast(list: Array<SignerTx>): Promise<Array<any>> {
-        const txList: any = [];
+        const tx = list[0];
 
-        return txList;
+        return metamaskApi.sendTransaction(tx;
     }
 
     public async sign(list: Array<SignerTx>): Promise<Array<any>> {
         this.__log('sign');
 
-        throw "Dont use this"; // should rework
+        return this.signAndBroadCast(list);
     }
 
     public signTypedData(data: Array<TypedData>): Promise<string> {

@@ -1,4 +1,5 @@
 import MetaMaskOnboarding from '@metamask/onboarding';
+import metamaskDetectProvider from '@metamask/detect-provider';
 
 // @ts-ignore
 const ethereumApi = ethereum;
@@ -8,6 +9,18 @@ const metamaskApi = {
     _accounts: [],
 
     isMetaMaskInstalled: MetaMaskOnboarding.isMetaMaskInstalled,
+
+    detectEthereumProvider: async (): Promise<boolean> => {
+        const provider = await metamaskDetectProvider();
+
+        if (provider) {
+          // From now on, this should always be true:
+          // provider === window.ethereum
+          return true;
+        } else {
+          return false;
+        }
+    },
 
     forwarderOrigin: function() {
         const currentUrl = new URL(window.location.href);
@@ -74,7 +87,6 @@ const metamaskApi = {
         }
     },
     
-
     // getEncryptionKey: async function(accounts) {
     //     try {
     //       const result = await ethereumApi.request({
@@ -88,6 +100,61 @@ const metamaskApi = {
     //     }
     // },
 
+    sendTransaction: async function(transaction: any): Promise<string> {
+        const transactionParameters = {
+            nonce: '0x00', // ignored by MetaMask
+            gasPrice: '0x09184e72a000', // customizable by user during MetaMask confirmation.
+            gas: '0x2710', // customizable by user during MetaMask confirmation.
+            to: '0x0000000000000000000000000000000000000000', // Required except during contract publications.
+            from: ethereumApi.selectedAddress, // must match user's active address.
+            value: '0x00', // Only required to send ether to the recipient from the initiating external account.
+            data: '0x7f7465737432000000000000000000000000000000000000000000000000000000600057', // Optional, but used for defining smart contract creation and interaction.
+            chainId: '0x3', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
+        };
+
+        // txHash is a hex string
+        // As with any RPC call, it may throw an error
+        const txHash = await ethereumApi.request({
+            method: 'eth_sendTransaction',
+            params: [transactionParameters],
+        });
+
+        return txHash;
+        // ethereumApi
+        //     .request({
+        //         method: 'eth_sendTransaction',
+        //         params: [transactionParameters],
+        //     })
+        //     .then((result) => {
+        //         // The result varies by RPC method.
+        //         // For example, this method will return a transaction hash hexadecimal string on success.
+        //     })
+        //     .catch((error) => {
+        //         // If the request fails, the Promise will reject with an error.
+        //     });
+    },
+
+    signTypedData: async function(params) {
+        params = [
+            {
+                type: 'string',
+                name: 'Message',
+                value: 'Hi, Alice!',
+            },
+            {
+                type: 'uint32',
+                name: 'A number',
+                value: '1337',
+            },
+        ];
+
+        const from = this._accounts[0];
+
+        const sign = await ethereumApi.request({
+            method: 'eth_signTypedData',
+            params: [params, from],
+        });
+    }
 }
 
 export default metamaskApi;
