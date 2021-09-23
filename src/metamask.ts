@@ -5,6 +5,8 @@ import metamaskDetectProvider from '@metamask/detect-provider';
 
 import { wavesAddress2eth } from '@waves/node-api-js';
 
+import { AddEthereumChainParameter } from './Metamask.interface';
+
 const BYTE_CODE = '0x';
 
 // @ts-ignore
@@ -114,6 +116,28 @@ const metamaskApi = {
             return permissionsArray;
         } catch (err) {
             console.error(err);
+            throw err;
+        }
+    },
+
+    addEthereumChain: async function(networkConfig: AddEthereumChainParameter) {
+        try {
+            await ethereumApi.request({
+                method: 'wallet_addEthereumChain',
+                params: [networkConfig],
+            });
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    switchEthereumChain: async function(networkConfig: AddEthereumChainParameter) {
+        try {
+            await ethereumApi.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: networkConfig.chainId }],
+            });
+        } catch (err) {
             throw err;
         }
     },

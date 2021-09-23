@@ -18,12 +18,17 @@ import {
 } from './ProviderMetamask.interface';
 
 import {
+    EMetamaskError
+} from './Metamask.interface';
+
+import {
     DEFAULT_PROVIDER_CONFIG,
     DEFAULT_WAVES_CONFIG,
+    METAMASK_NETWORK_CONFIG_WAVES_DEVNET,
+    METAMASK_NETWORK_CONFIG_WAVES_MAINNET,
 } from './config';
-
-import metamaskApi from './metamask'
 import { getInvokeArgsValues } from './utils';
+import metamaskApi from './metamask'
 
 export class ProviderMetamask implements Provider {
     private _config: IProviderMetamaskConfig;
@@ -41,8 +46,8 @@ export class ProviderMetamask implements Provider {
     public async login(): Promise<UserData> {
         this.__log('login');
 
-        // const users = await metamaskApi.requestAccounts();
-        const users = await metamaskApi.getAccounts();
+        const users = await metamaskApi.requestAccounts();
+        // const users = await metamaskApi.getAccounts();
 
         if(users?.length) {
             const ethAddr: string = users[0];
@@ -119,12 +124,24 @@ export class ProviderMetamask implements Provider {
         throw "Dont use this"; // should rework
     }
 
-    public connect(options: ConnectOptions): Promise<void> {
+    public async connect(options: ConnectOptions): Promise<void> {
         this.__log('connect', options);
 
-        // this._options = options;
+        // const networkConfigMain = METAMASK_NETWORK_CONFIG_WAVES_MAINNET;
+        // const networkConfigDev = METAMASK_NETWORK_CONFIG_WAVES_DEVNET;
 
-        return Promise.resolve();
+        // // try to switch on waves network or create it
+        // try {
+        //     await metamaskApi.switchEthereumChain(METAMASK_NETWORK_CONFIG_WAVES_DEVNET);
+        // } catch (err) {
+        //     switch (err.code) {
+        //         case EMetamaskError.CHAIN_NOT_ADDED:
+        //             await metamaskApi.addEthereumChain(METAMASK_NETWORK_CONFIG_WAVES_DEVNET);
+        //             break;
+        //         case EMetamaskError.REJECT_REQUEST:
+        //             throw 'Switch to waves network is rejected';
+        //     }
+        // }
     }
 
     public on<EVENT extends keyof AuthEvents>(
