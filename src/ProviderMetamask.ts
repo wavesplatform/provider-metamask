@@ -8,30 +8,24 @@ import {
     TypedData,
     UserData,
 } from '@waves/signer';
-// import { fetchNodeTime } from '@waves/node-api-js/es/api-node/utils';
-// import { fetchBalanceDetails } from '@waves/node-api-js/es/api-node/addresses';
-// import { fetchAssetsDetails } from '@waves/node-api-js/es/api-node/assets';
-// import { makeTxBytes, signTx, serializeCustomData, libs } from '@waves/waves-transactions';
 
-import metamaskApi from './metamask'
+import { ethAddress2waves } from '@waves/node-api-js';
+import { TRANSACTION_TYPE } from '@waves/ts-types';
 
-// import {
-//     errorUserCancel,
-//     isSupportedBrowser,
-//     promiseWrapper,
-//     sleep
-// } from './utils';
 import {
     IUser,
     IProviderMetamaskConfig,
 } from './ProviderMetamask.interface';
 
-const DEFAULT_PROVIDER_CONFIG = {
-    debug: false,
-};
+import {
+    DEFAULT_PROVIDER_CONFIG,
+    DEFAULT_WAVES_CONFIG,
+} from './config';
+
+import metamaskApi from './metamask'
+import { getInvokeArgsValues } from './utils';
 
 export class ProviderMetamask implements Provider {
-// export class ProviderMetamask {
     private _config: IProviderMetamaskConfig;
     private mmOnboarding?: MetaMaskOnboarding;
 
@@ -39,8 +33,9 @@ export class ProviderMetamask implements Provider {
 
     constructor(config?: IProviderMetamaskConfig) {
         this._config = config || DEFAULT_PROVIDER_CONFIG;
+        this._config.wavesConfig = { ...DEFAULT_WAVES_CONFIG, ...this._config.wavesConfig };
 
-        this.__log('constructor');
+        this.__log('constructor', this._config);
     }
 
     public async login(): Promise<UserData> {
@@ -56,10 +51,11 @@ export class ProviderMetamask implements Provider {
                 id: 0,
                 path: '',
                 publicKey: '',
-                address: eth2waves(ethAddr, 67), //todo check to get from MM
+                address: ethAddress2waves(ethAddr, this._config.wavesConfig.chainId), //todo check to get from MM
                 statusCode: ''
-    
             };
+
+            this.__log('login :: ', this.user);
 
             return this.user
         } else {
@@ -74,9 +70,35 @@ export class ProviderMetamask implements Provider {
     }
 
     public async signAndBroadCast(list: Array<SignerTx>): Promise<Array<any>> {
-        const tx = list[0];
+        this.__log('signAndBroadCast :: ', list);
 
-        return metamaskApi.sendTransaction(tx;
+        return Promise.all(list.map(async (tx) => {
+            const wavesConfig = this._config.wavesConfig;
+
+            if(tx.type == TRANSACTION_TYPE.TRANSFER) {
+
+            } else if (tx.type == TRANSACTION_TYPE.INVOKE_SCRIPT) {
+                const txInvoke = tx;
+                const call = txInvoke.call!;
+                const name = call.function;
+                const dappAddress = txInvoke.dApp;
+
+                const contract = await metamaskApi.createContract(dappAddress, wavesConfig.nodeUrl);
+
+                const paramsValues = getInvokeArgsValues(call.args);;
+                const payments = txInvoke.payment || [];
+
+                const txId = await contract[name](
+                    ...paramsValues,
+                    payments
+                );
+
+                return {
+                    ...tx,
+                    id: txId
+                };
+            }
+        }));
     }
 
     public async sign(list: Array<SignerTx>): Promise<Array<any>> {
@@ -132,9 +154,9 @@ export class ProviderMetamask implements Provider {
         return this;
     }
 
-    private initMetamask() {
-        this.mmOnboarding = new MetaMaskOnboarding({ forwarderOrigin: metamaskApi.forwarderOrigin() });
-    }
+    // private initMetamask() {
+    //     this.mmOnboarding = new MetaMaskOnboarding({ forwarderOrigin: metamaskApi.forwarderOrigin() });
+    // }
 
     private __log(tag: string, ...args) {
         if (this._config.debug) {
@@ -142,36 +164,4 @@ export class ProviderMetamask implements Provider {
         }
     }
 
-}
-
-
-// TODO user npde-api-js
-import { keccak, blake2b, base58Encode, base16Decode } from '@waves/ts-lib-crypto'
-
-const eth2waves = (ethAddress: string, chainId: number): string => {
-    ethAddress = ethAddress.substr(2);
-
-    const prefixBytes = new Uint8Array([0x01, chainId]);
-
-    // Раскодировать HEX строку в байты (PK_HASH)
-    const pkHashBytes = base16Decode(ethAddress);
-
-    // Сделать чексумму CHECKSUM=keccak256(blake2b256([0x01, CHAIN_ID] + PK_HASH))
-    const checksumBytes = new Uint8Array([
-        ...prefixBytes,
-        ...pkHashBytes
-    ]);
-    const checksum = keccak(blake2b(checksumBytes));      
-
-    // склеить [0x01, CHAIN_ID] (два байта) + PK_HASH (изначальные 20 байт) + CHECKSUM[1:4] (первые четыре байта чексуммы)
-    const wavesBytes = new Uint8Array([
-        ...prefixBytes,
-        ...pkHashBytes.slice(0, 20),
-        ...checksum.slice(0, 4)
-    ]);
-
-    // закодировать в base58
-    const wavesAddress = base58Encode(wavesBytes);
-
-    return wavesAddress;
 }

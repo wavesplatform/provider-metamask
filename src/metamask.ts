@@ -1,5 +1,11 @@
+import { ethers } from 'ethers';
+
 import MetaMaskOnboarding from '@metamask/onboarding';
 import metamaskDetectProvider from '@metamask/detect-provider';
+
+import { wavesAddress2eth } from '@waves/node-api-js';
+
+const BYTE_CODE = '0x';
 
 // @ts-ignore
 const ethereumApi = ethereum;
@@ -22,11 +28,36 @@ const metamaskApi = {
         }
     },
 
-    forwarderOrigin: function() {
-        const currentUrl = new URL(window.location.href);
-    
-        return currentUrl.hostname === 'localhost' ? 'http://localhost:9010' : undefined;
+    createContract: async function(wavesaddress: string, nodeUrl: string) {
+        const ethersProvider = new ethers.providers.Web3Provider(ethereumApi, 'any');
+
+        const ethAddress = wavesAddress2eth(wavesaddress);
+        const url = `${nodeUrl}/eth/abi/${wavesaddress}`;
+        
+        // todo to node-api-js
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if(data.error) {
+            throw data;
+        }
+
+        const bankAbi = data;
+        const bankFactory = new ethers.ContractFactory(
+            bankAbi,
+            BYTE_CODE,
+            ethersProvider.getSigner(),
+        );
+
+        const contract = await bankFactory.attach(ethAddress);
+
+        return contract;
     },
+    // forwarderOrigin: function() {
+    //     const currentUrl = new URL(window.location.href);
+    
+    //     return currentUrl.hostname === 'localhost' ? 'http://localhost:9010' : undefined;
+    // },
 
     requestAccounts: async function(): Promise<string[]> {
         try {
@@ -86,7 +117,7 @@ const metamaskApi = {
             throw err;
         }
     },
-    
+
     // getEncryptionKey: async function(accounts) {
     //     try {
     //       const result = await ethereumApi.request({
