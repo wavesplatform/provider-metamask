@@ -46,6 +46,8 @@ export class ProviderMetamask implements Provider {
     public async login(): Promise<UserData> {
         this.__log('login');
 
+        await this.trySwitchNetwork();
+
         const users = await metamaskApi.requestAccounts();
         // const users = await metamaskApi.getAccounts();
 
@@ -126,22 +128,6 @@ export class ProviderMetamask implements Provider {
 
     public async connect(options: ConnectOptions): Promise<void> {
         this.__log('connect', options);
-
-        // const networkConfigMain = METAMASK_NETWORK_CONFIG_WAVES_MAINNET;
-        // const networkConfigDev = METAMASK_NETWORK_CONFIG_WAVES_DEVNET;
-
-        // // try to switch on waves network or create it
-        // try {
-        //     await metamaskApi.switchEthereumChain(METAMASK_NETWORK_CONFIG_WAVES_DEVNET);
-        // } catch (err) {
-        //     switch (err.code) {
-        //         case EMetamaskError.CHAIN_NOT_ADDED:
-        //             await metamaskApi.addEthereumChain(METAMASK_NETWORK_CONFIG_WAVES_DEVNET);
-        //             break;
-        //         case EMetamaskError.REJECT_REQUEST:
-        //             throw 'Switch to waves network is rejected';
-        //     }
-        // }
     }
 
     public on<EVENT extends keyof AuthEvents>(
@@ -174,6 +160,26 @@ export class ProviderMetamask implements Provider {
     // private initMetamask() {
     //     this.mmOnboarding = new MetaMaskOnboarding({ forwarderOrigin: metamaskApi.forwarderOrigin() });
     // }
+
+    private async trySwitchNetwork() {
+        const networkConfigMain = METAMASK_NETWORK_CONFIG_WAVES_MAINNET;
+        const networkConfigDev = METAMASK_NETWORK_CONFIG_WAVES_DEVNET;
+
+        // try to switch on waves network or create it
+        try {
+            await metamaskApi.switchEthereumChain(METAMASK_NETWORK_CONFIG_WAVES_DEVNET);
+        } catch (err) {
+            switch (err.code) {
+                case EMetamaskError.CHAIN_NOT_ADDED:
+                    await metamaskApi.addEthereumChain(METAMASK_NETWORK_CONFIG_WAVES_DEVNET);
+                    break;
+                case EMetamaskError.REJECT_REQUEST:
+                    throw 'Switch to waves network is rejected';
+            }
+
+            throw err;
+        }
+    }
 
     private __log(tag: string, ...args) {
         if (this._config.debug) {
