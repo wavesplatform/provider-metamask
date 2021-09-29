@@ -77,7 +77,7 @@ export class ProviderMetamask implements Provider {
     public async signAndBroadCast(list: Array<SignerTx>): Promise<Array<any>> {
         this.__log('signAndBroadCast :: ', list);
 
-        return Promise.all(list.map(this.signOneTx))
+        return Promise.all(list.map(this.signOneTx, this))
             .then((txList) => txList[0]); // TODO too much crutches
     }
 
