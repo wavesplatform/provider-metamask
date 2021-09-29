@@ -24,10 +24,8 @@ import {
 import {
     DEFAULT_PROVIDER_CONFIG,
     DEFAULT_WAVES_CONFIG,
-    METAMASK_NETWORK_CONFIG_WAVES_DEVNET,
-    METAMASK_NETWORK_CONFIG_WAVES_MAINNET,
 } from './config';
-import { getInvokeArgsValues } from './utils';
+import { getInvokeArgsValues, getMetamaskNetworkConfig, formatPayments } from './utils';
 import metamaskApi from './metamask'
 
 export class ProviderMetamask implements Provider {
@@ -93,8 +91,9 @@ export class ProviderMetamask implements Provider {
                 const contract = await metamaskApi.createContract(dappAddress, wavesConfig.nodeUrl);
 
                 const paramsValues = getInvokeArgsValues(call.args);;
-                const payments = txInvoke.payment || [];
+                const payments = formatPayments(txInvoke.payment || []);
 
+                this.__log('signAndBroadCast :: invoke ', name, paramsValues, payments);
                 const txId = await contract[name](
                     ...paramsValues,
                     payments
@@ -157,21 +156,21 @@ export class ProviderMetamask implements Provider {
         return this;
     }
 
-    // private initMetamask() {
-    //     this.mmOnboarding = new MetaMaskOnboarding({ forwarderOrigin: metamaskApi.forwarderOrigin() });
-    // }
-
     private async trySwitchNetwork() {
-        const networkConfigMain = METAMASK_NETWORK_CONFIG_WAVES_MAINNET;
-        const networkConfigDev = METAMASK_NETWORK_CONFIG_WAVES_DEVNET;
+        const networkConfig = getMetamaskNetworkConfig(this._config.wavesConfig.chainId);
+
+        if(networkConfig == null) {
+            this.__log('trySwitchNetwork :: skiped');
+            return;
+        }
 
         // try to switch on waves network or create it
         try {
-            await metamaskApi.switchEthereumChain(METAMASK_NETWORK_CONFIG_WAVES_DEVNET);
+            await metamaskApi.switchEthereumChain(networkConfig);
         } catch (err) {
             switch (err.code) {
                 case EMetamaskError.CHAIN_NOT_ADDED:
-                    await metamaskApi.addEthereumChain(METAMASK_NETWORK_CONFIG_WAVES_DEVNET);
+                    await metamaskApi.addEthereumChain(networkConfig);
                     break;
                 case EMetamaskError.REJECT_REQUEST:
                     throw 'Switch to waves network is rejected';

@@ -1,3 +1,7 @@
+/*
+    https://docs.metamask.io/guide/rpc-api.html#other-rpc-methods
+*/
+
 export interface AddEthereumChainParameter {
     chainId: string; // A 0x-prefixed hexadecimal string
     chainName: string;
