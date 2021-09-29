@@ -1,6 +1,6 @@
 {
   "name": "@waves/provider-metamask",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "main": "dist/provider-metamask.js",
   "types": "dist/index.d.ts",
   "repository": {
@@ -22,7 +22,7 @@
     "@metamask/detect-provider": "^1.2.0",
     "@metamask/onboarding": "^1.0.1",
     "@types/ramda": "^0.26.38",
-    "@waves/node-api-js": "^1.2.5-beta.2",
+    "@waves/node-api-js": "^1.2.5-beta.6",
     "@waves/provider-metamask": "^0.0.2",
     "@waves/signer": "1.0.2",
     "@waves/ts-types": "^0.3.5",

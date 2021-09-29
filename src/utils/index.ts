@@ -1,6 +1,5 @@
-import { base58Decode } from '@waves/ts-lib-crypto'
-// import { wavesAsset2Eth } from '@waves/node-api-js';
-import { encode64, decode64, hexToBytes, bytesToHex } from 'node-forge/lib/util'
+import { base58Decode } from '@waves/ts-lib-crypto';
+import { bytesToHex } from 'node-forge/lib/util';
 import { AddEthereumChainParameter } from '../Metamask.interface';
 
 const getInvokeArgValue = (item: any) => {

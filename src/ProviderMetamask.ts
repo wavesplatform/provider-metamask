@@ -9,7 +9,7 @@ import {
     UserData,
 } from '@waves/signer';
 
-import { ethAddress2waves } from '@waves/node-api-js';
+import { ethAddress2waves, ethTxId2waves } from '@waves/node-api-js';
 import { TRANSACTION_TYPE } from '@waves/ts-types';
 
 import {
@@ -77,34 +77,8 @@ export class ProviderMetamask implements Provider {
     public async signAndBroadCast(list: Array<SignerTx>): Promise<Array<any>> {
         this.__log('signAndBroadCast :: ', list);
 
-        return Promise.all(list.map(async (tx) => {
-            const wavesConfig = this._config.wavesConfig;
-
-            if(tx.type == TRANSACTION_TYPE.TRANSFER) {
-
-            } else if (tx.type == TRANSACTION_TYPE.INVOKE_SCRIPT) {
-                const txInvoke = tx;
-                const call = txInvoke.call!;
-                const name = call.function;
-                const dappAddress = txInvoke.dApp;
-
-                const contract = await metamaskApi.createContract(dappAddress, wavesConfig.nodeUrl);
-
-                const paramsValues = getInvokeArgsValues(call.args);;
-                const payments = formatPayments(txInvoke.payment || []);
-
-                this.__log('signAndBroadCast :: invoke ', name, paramsValues, payments);
-                const txId = await contract[name](
-                    ...paramsValues,
-                    payments
-                );
-
-                return {
-                    ...tx,
-                    id: txId
-                };
-            }
-        }));
+        return Promise.all(list.map(this.signOneTx))
+            .then((txList) => txList[0]); // TODO too much crutches
     }
 
     public async sign(list: Array<SignerTx>): Promise<Array<any>> {
@@ -177,6 +151,35 @@ export class ProviderMetamask implements Provider {
             }
 
             throw err;
+        }
+    }
+
+    private async signOneTx(tx: SignerTx): Promise<any> {
+        const wavesConfig = this._config.wavesConfig;
+
+        if(tx.type == TRANSACTION_TYPE.TRANSFER) {
+
+        } else if (tx.type == TRANSACTION_TYPE.INVOKE_SCRIPT) {
+            const txInvoke = tx;
+            const call = txInvoke.call!;
+            const name = call.function;
+            const dappAddress = txInvoke.dApp;
+
+            const contract = await metamaskApi.createContract(dappAddress, wavesConfig.nodeUrl);
+
+            const paramsValues = getInvokeArgsValues(call.args);;
+            const payments = formatPayments(txInvoke.payment || []);
+
+            this.__log('signAndBroadCast :: invoke ', name, paramsValues, payments);
+            const txInfo = await contract[name](
+                ...paramsValues,
+                payments
+            );
+
+            return {
+                ...tx,
+                id: ethTxId2waves(txInfo.hash.slice(2))
+            };
         }
     }
 
