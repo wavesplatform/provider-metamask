@@ -25,7 +25,7 @@ import {
     DEFAULT_PROVIDER_CONFIG,
     DEFAULT_WAVES_CONFIG,
 } from './config';
-import { getInvokeArgsValues, getMetamaskNetworkConfig, formatPayments } from './utils';
+import { getMetamaskNetworkConfig, formatPayments, serializeInvokeParams } from './utils';
 import metamaskApi from './metamask'
 
 export class ProviderMetamask implements Provider {
@@ -167,11 +167,11 @@ export class ProviderMetamask implements Provider {
 
             const contract = await metamaskApi.createContract(dappAddress, wavesConfig.nodeUrl);
 
-            const paramsValues = getInvokeArgsValues(call.args);;
+            const paramsValues = serializeInvokeParams(call.args, contract.abi.inputs);
             const payments = formatPayments(txInvoke.payment || []);
 
             this.__log('signAndBroadCast :: invoke ', name, paramsValues, payments);
-            const txInfo = await contract[name](
+            const txInfo = await contract.contract[name](
                 ...paramsValues,
                 payments
             );

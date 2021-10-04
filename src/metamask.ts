@@ -2,10 +2,13 @@ import { ethers } from 'ethers';
 
 import MetaMaskOnboarding from '@metamask/onboarding';
 import metamaskDetectProvider from '@metamask/detect-provider';
-
 import { wavesAddress2eth } from '@waves/node-api-js';
 
-import { AddEthereumChainParameter } from './Metamask.interface';
+import {
+    AddEthereumChainParameter,
+    EthereumAddress,
+    IContractMeta,
+} from './Metamask.interface';
 
 const BYTE_CODE = '0x';
 
@@ -30,7 +33,7 @@ const metamaskApi = {
         }
     },
 
-    createContract: async function(wavesaddress: string, nodeUrl: string) {
+    createContract: async function(wavesaddress: string, nodeUrl: string): Promise<IContractMeta> {
         const ethersProvider = new ethers.providers.Web3Provider(ethereumApi, 'any');
 
         const ethAddress = wavesAddress2eth(wavesaddress);
@@ -53,7 +56,10 @@ const metamaskApi = {
 
         const contract = await bankFactory.attach(ethAddress);
 
-        return contract;
+        return {
+            contract,
+            abi: bankAbi[0]
+        };
     },
     // forwarderOrigin: function() {
     //     const currentUrl = new URL(window.location.href);
@@ -78,7 +84,7 @@ const metamaskApi = {
     },
 
     //
-    getAccounts: async function() {
+    getAccounts: async function(): Promise<EthereumAddress[]> {
         try {
             const newAccounts = await ethereumApi.request({
                 method: 'eth_accounts',
@@ -120,7 +126,7 @@ const metamaskApi = {
         }
     },
 
-    addEthereumChain: async function(networkConfig: AddEthereumChainParameter) {
+    addEthereumChain: async function(networkConfig: AddEthereumChainParameter): Promise<void> {
         try {
             await ethereumApi.request({
                 method: 'wallet_addEthereumChain',
@@ -131,7 +137,7 @@ const metamaskApi = {
         }
     },
 
-    switchEthereumChain: async function(networkConfig: AddEthereumChainParameter) {
+    switchEthereumChain: async function(networkConfig: AddEthereumChainParameter): Promise<void> {
         try {
             await ethereumApi.request({
                 method: 'wallet_switchEthereumChain',
