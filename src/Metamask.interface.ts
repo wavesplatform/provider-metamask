@@ -1,13 +1,13 @@
 import { ethers } from 'ethers';
 
 export type EthereumAddress = string;
-export type TupleCortege = Array<5>;
+export type TupleCortege = [number, string, boolean, string, number];
 
 export enum EValueIndex {
-    BOOLEAN = 2,
-    BINARY = 3,
-    INTEGER = 4,
-    STRING = 1
+    BOOLEAN = 1,
+    BINARY = 2,
+    INTEGER = 3,
+    STRING = 0
 }
 
 export enum EAbiInputTypes {

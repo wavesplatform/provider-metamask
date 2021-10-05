@@ -4,7 +4,7 @@ import { bytesToHexString } from './common';
 import { EValueIndex, IAbiInput, EAbiInputTypes, TupleCortege } from '../Metamask.interface'
 
 const makeTupleItem = (item: InvokeScriptCallArgument<Long>): TupleCortege => {
-    const itemTemplate: any = [1, '', false, '0x', 0];
+    const itemTemplate: TupleCortege = [EValueIndex.BOOLEAN, '', false, '0x', 0];
 
     let valueIndex;
 
@@ -24,7 +24,7 @@ const makeTupleItem = (item: InvokeScriptCallArgument<Long>): TupleCortege => {
     }
 
     itemTemplate[0] = valueIndex;
-    itemTemplate[valueIndex] = item.value;
+    itemTemplate[valueIndex] = item.value as (string | number | boolean); // todo
 
     return itemTemplate;
 }
