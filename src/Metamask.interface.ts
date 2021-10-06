@@ -1,30 +1,34 @@
 import { ethers } from 'ethers';
 
 export type EthereumAddress = string;
-export type TupleCortege = [number, string, boolean, string, number];
+export type TupleCortege = any[];
 
-export enum EValueIndex {
-    BOOLEAN = 1,
-    BINARY = 2,
-    INTEGER = 3,
-    STRING = 0
+export enum EInvokeArgType {
+    BINARY = 'binary',
+    BOOLEAN = 'boolean',
+    INTEGER = 'integer',
+    STRING = 'string',
 }
 
 export enum EAbiInputTypes {
+    BOOL = 'bool',
+    BYTES = 'bytes',
     INT_64 = 'int64',
     STRING = 'string',
-    BYTES = 'bytes',
-    BOOL = 'bool',
+    TUPLE = 'tuple',
     LIST_INT_64 = 'int64[]',
     LIST_STRING = 'string[]',
     LIST_BYTES = 'bytes[]',
     LIST_BOOL = 'bool[]',
-    TUPLE = 'tuple[]',
+    LIST_TUPLE = 'tuple[]',
 }
+
+export type AbiInputTypesIndexMap = { [key in EAbiInputTypes]?: number };
 
 export interface IAbiInput {
     name: string;
     type: EAbiInputTypes;
+    components?: IAbiInput[];
 }
 
 export interface IAbi {
