@@ -13,7 +13,7 @@ const formatPayment = (payment: any): any[] => {
     const amount = payment.amount;
     let assetId = payment.assetId;
 
-    if (assetId === 'WAVES') { // todo WAVES
+    if (assetId === 'WAVES' || assetId === null) { // todo WAVES
         assetId = WAVES_ASSET_ID_CONVERTED;
     } else {
         const bytes = base58Decode(assetId);
@@ -26,6 +26,11 @@ const formatPayment = (payment: any): any[] => {
 
 export const formatPayments = (payments: any[]): any[] => {
     return payments.map(formatPayment);
+};
+
+const ETHEREUM_DECIMALS = 18;
+export const toEthereumAmount = (amount: number, decimals: number): number => {
+    return amount * ( 10 ** (ETHEREUM_DECIMALS - decimals + 1)); // TODO - 1
 };
 
 const METAMASK_NETWORK_CONFIG_WAVES_DEVNET: AddEthereumChainParameter = {

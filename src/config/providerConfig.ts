@@ -1,4 +1,4 @@
-import { IWavesConfig, IProviderMetamaskConfig } from './ProviderMetamask.interface';
+import { IWavesConfig, IProviderMetamaskConfig } from '../ProviderMetamask.interface';
 
 export const DEFAULT_WAVES_CONFIG: IWavesConfig = {
     chainId: 87,

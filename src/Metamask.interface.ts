@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 
 export type EthereumAddress = string;
 export type TupleCortege = any[];
+export type MetamaskSign = string;
 
 export enum EInvokeArgType {
     BINARY = 'binary',
@@ -39,6 +40,12 @@ export interface IAbi {
 export interface IContractMeta {
     contract: ethers.Contract;
     abi: IAbi;
+}
+
+export interface IMMTypedData {
+    type: string;
+    name: string;
+    value: string;
 }
 
 /*

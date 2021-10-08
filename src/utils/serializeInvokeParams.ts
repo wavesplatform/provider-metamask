@@ -75,7 +75,7 @@ const serializeInvokeParam = (abiInput: IAbiInput, value: any) => {
         case EAbiInputTypes.STRING:
             return value;
         case EAbiInputTypes.BYTES:
-            return serializeBinary(value);
+            return serializeBinary(value); // todo check type
         case EAbiInputTypes.TUPLE:
             return makeTupleItem(abiInput.components!, value);
         case EAbiInputTypes.LIST_BOOL:

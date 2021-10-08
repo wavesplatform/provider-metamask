@@ -1,4 +1,4 @@
-import MetaMaskOnboarding from '@metamask/onboarding';
+// import MetaMaskOnboarding from '@metamask/onboarding';
 import {
     AuthEvents,
     ConnectOptions,
@@ -6,31 +6,20 @@ import {
     Provider,
     SignerTx,
     TypedData,
-    UserData,
+    UserData
 } from '@waves/signer';
-
-import { ethAddress2waves, ethTxId2waves } from '@waves/node-api-js';
+import { ethAddress2waves, ethTxId2waves, wavesAddress2eth } from '@waves/node-api-js';
 import { TRANSACTION_TYPE } from '@waves/ts-types';
 
-import {
-    IUser,
-    IProviderMetamaskConfig,
-} from './ProviderMetamask.interface';
-
-import {
-    EMetamaskError
-} from './Metamask.interface';
-
-import {
-    DEFAULT_PROVIDER_CONFIG,
-    DEFAULT_WAVES_CONFIG,
-} from './config';
-import { getMetamaskNetworkConfig, formatPayments, serializeInvokeParams } from './utils';
+import { IUser, IProviderMetamaskConfig } from './ProviderMetamask.interface';
+import { EMetamaskError, IMMTypedData, MetamaskSign } from './Metamask.interface';
+import { DEFAULT_PROVIDER_CONFIG, DEFAULT_WAVES_CONFIG, ORDER_MODEL } from './config';
+import { getMetamaskNetworkConfig, formatPayments, serializeInvokeParams, toMetamaskTypedData } from './utils';
 import metamaskApi from './metamask'
 
 export class ProviderMetamask implements Provider {
     private _config: IProviderMetamaskConfig;
-    private mmOnboarding?: MetaMaskOnboarding;
+    // private mmOnboarding?: MetaMaskOnboarding;
 
     public user: IUser | null = null;
 
@@ -87,16 +76,65 @@ export class ProviderMetamask implements Provider {
         return this.signAndBroadCast(list);
     }
 
-    public signTypedData(data: Array<TypedData>): Promise<string> {
-        this.__log('signTypedData');
+    public async signTypedData(data: Array<TypedData>): Promise<MetamaskSign> {
+        this.__log('signTypedData :: ', data);
 
-        throw "Dont use this"; // should rework
+        const typedData: IMMTypedData[] = data.map(toMetamaskTypedData);
+
+        this.__log('signTypedData :: metamaskApi.signTypedData ', typedData);
+        const sign = await metamaskApi.signTypedData(typedData);
+
+        this.__log('signTypedData :: result :: ', sign);
+        return sign;
     }
 
-    public async signMessage(data: string | number): Promise<string> {
-        this.__log('signMessage', data);
+    public async signMessage(data: string | number): Promise<MetamaskSign> {
+        this.__log('signMessage :: ', data);
 
-        throw "Dont use this"; // should rework
+        const typedData: IMMTypedData = {
+            type: 'string',
+            name: 'message',
+            value: String(data),
+        };
+
+        const sign = await metamaskApi.signTypedData([typedData]);
+
+        this.__log('signMessage :: result :: ', sign);
+        return sign;
+    }
+
+    public async signOrder(order: any): Promise<MetamaskSign> {
+        this.__log('signOrder :: ', order);
+
+        const publicKey = await metamaskApi.getEncryptionPublicKey();
+        const orderToSign = {
+            ...ORDER_MODEL,
+            ... {
+                domain: {
+                    ...ORDER_MODEL.domain,
+                    chainId: this._config.wavesConfig.chainId
+                },
+                message: {
+                    "version": order.version,
+                    "matcherPublicKey": publicKey,
+                    "amountAsset": order.assetPair.amountAsset,
+                    "priceAsset": order.assetPair.priceAsset,
+                    "orderType": order.orderType,
+                    "amount": order.amount || 0,
+                    "price": order.price,
+                    "timestamp": order.timestamp,
+                    "expiration": order.expiration,
+                    "matcherFee": order.matcherFee,
+                    "matcherFeeAssetId": "WAVES",
+                }
+            }
+        };
+
+        this.__log('signOrder :: metamaskApi.signOrder :: ', orderToSign);
+        const result = await metamaskApi.signOrder(orderToSign);
+
+        this.__log('signOrder :: result :: ',result);
+        return result;
     }
 
     public async connect(options: ConnectOptions): Promise<void> {
@@ -158,6 +196,34 @@ export class ProviderMetamask implements Provider {
         const wavesConfig = this._config.wavesConfig;
 
         if(tx.type == TRANSACTION_TYPE.TRANSFER) {
+            let sign;
+
+            if(tx.assetId === 'WAVES') {
+                tx.assetId = null;
+            }
+
+            if (tx.assetId === null) {
+                sign = await metamaskApi.transferWaves(
+                    wavesAddress2eth(tx.recipient),
+                    String(tx.amount)
+                );
+            } else {
+                const txInfo = await metamaskApi.transferAsset(
+                    tx.assetId!, // todo convert to ethereum asset
+                    wavesAddress2eth(tx.recipient),
+                    String(tx.amount)
+                );
+
+                sign = txInfo.hash.slice(2);
+            }
+
+            const result = {
+                ...tx,
+                id: sign
+            };
+
+            this.__log('signOneTx :: result :: ', result);
+            return result;
 
         } else if (tx.type == TRANSACTION_TYPE.INVOKE_SCRIPT) {
             const txInvoke = tx;
@@ -176,10 +242,13 @@ export class ProviderMetamask implements Provider {
                 payments
             );
 
-            return {
+            const result = {
                 ...tx,
                 id: ethTxId2waves(txInfo.hash.slice(2))
             };
+
+            this.__log('signOneTx :: result :: ', result);
+            return result;
         }
     }
 

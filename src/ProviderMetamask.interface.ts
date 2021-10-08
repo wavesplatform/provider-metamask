@@ -1,15 +1,14 @@
-// todo move away
+// todo move away (signer)
 export interface IUser extends IUserData {
     id: number;
     path: string;
 }
 
-// todo move away
+// todo move away (signer)
 export interface IUserData {
     publicKey: string;
     address: string;
     statusCode: string;
-
 }
 
 export interface IWavesConfig {
