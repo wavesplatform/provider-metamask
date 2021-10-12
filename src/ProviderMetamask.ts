@@ -169,6 +169,8 @@ export class ProviderMetamask implements Provider {
     }
 
     private async trySwitchNetwork() {
+        this.__log('trySwitchNetwork');
+
         const networkConfig = getMetamaskNetworkConfig(this._config.wavesConfig.chainId);
 
         if(networkConfig == null) {
@@ -178,12 +180,14 @@ export class ProviderMetamask implements Provider {
 
         // try to switch on waves network or create it
         try {
+            this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain', networkConfig);
             await metamaskApi.switchEthereumChain(networkConfig);
         } catch (err) {
             switch (err.code) {
                 case EMetamaskError.CHAIN_NOT_ADDED:
+                    this.__log('trySwitchNetwork :: metamaskApi.addEthereumChain', networkConfig);
                     await metamaskApi.addEthereumChain(networkConfig);
-                    break;
+                    return;
                 case EMetamaskError.REJECT_REQUEST:
                     throw 'Switch to waves network is rejected';
             }
