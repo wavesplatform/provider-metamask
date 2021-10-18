@@ -67,7 +67,13 @@ export class ProviderMetamask implements Provider {
         this.__log('signAndBroadCast :: ', list);
 
         return Promise.all(list.map(this.signOneTx, this))
-            .then((txList) => txList[0]); // TODO too much crutches
+            .then((txList) => {
+                if(txList.length === 1) {
+                    return txList[0];
+                } else {
+                    return txList;
+                }
+            });
     }
 
     public async sign(list: Array<SignerTx>): Promise<Array<any>> {
@@ -185,7 +191,7 @@ export class ProviderMetamask implements Provider {
         } catch (err) {
             switch (err.code) {
                 case EMetamaskError.CHAIN_NOT_ADDED:
-                    this.__log('trySwitchNetwork :: metamaskApi.addEthereumChain', networkConfig);
+                    this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain', networkConfig);
                     await metamaskApi.addEthereumChain(networkConfig);
                     return;
                 case EMetamaskError.REJECT_REQUEST:
@@ -240,7 +246,7 @@ export class ProviderMetamask implements Provider {
             const paramsValues = serializeInvokeParams(call.args, contract.abi.inputs);
             const payments = formatPayments(txInvoke.payment || []);
 
-            this.__log('signAndBroadCast :: invoke ', name, paramsValues, payments);
+            this.__log('signOneTx :: invoke ', name, paramsValues, payments);
             const txInfo = await contract.contract[name](
                 ...paramsValues,
                 payments

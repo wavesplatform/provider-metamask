@@ -64,12 +64,51 @@ const [transfer] = await signer
     amount: 1,
     recipient: 'alias:T:merry',
   })
-  .signAndBroadcast();
+  .broadcast();
+```
+
+```js
+const user = await signer.login();
+const [invoke] = await signer
+  .invoke({
+    dApp: "3F4bY4PsS8E1tShx9ruSYthie3uzYiSffSv",
+    call:{
+      function: "deposit",
+      args:[{ type: "string", value: "string" }]
+    },
+    payment:[]
+  })
+  .broadcast();
 ```
 
 For more information see [Signer documentation](https://github.com/wavesplatform/signer/blob/master/README.md).
 
-### 4. How to get Ethereum address
+### 4. How to sign order
+
+Set the order parameters:
+- Omit senderPublicKey.
+- Specify asset IDs in Waves format: 32 bytes in base58. For WAVES use the string WAVES.
+
+```js
+const orderData = {
+  orderType: 'sell',
+  version: 4,
+  assetPair: {
+    amountAsset: 100000,
+    priceAsset: 500000,
+  },
+  price: 100000,
+  amount: 100000,
+  timestamp: 1634563969123,
+  expiration: 1637069590926,
+  matcherFee: 300000,
+  matcherFeeAssetId: null,
+};
+const provider = new ProviderMetamask();
+const sign = await provider.signOrder(orderData);
+```
+
+### 5. How to get Ethereum address
 
 ```js
 import { ProviderMetamask } from '@waves/provider-metamask';

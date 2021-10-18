@@ -215,7 +215,7 @@ const metamaskApi = {
         return result;
     },
 
-    signOrder: async function(order: any) {
+    signOrder: async function(order: any): Promise<MetamaskSign> {
         return this.signTypedDataV4(JSON.stringify(order));
     },
 
