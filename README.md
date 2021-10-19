@@ -95,7 +95,7 @@ const orderData = {
   version: 4,
   assetPair: {
     amountAsset: '8KTfWNoWYf9bP3hg1QYBLpkk9tgRb5wiUZnT1HUiNa9r',
-    priceAsset: 500000,
+    priceAsset: 'WAVES',
   },
   price: 100000,
   amount: 100000,
