@@ -17,7 +17,10 @@ import { DEFAULT_PROVIDER_CONFIG, DEFAULT_WAVES_CONFIG, ORDER_MODEL } from './co
 import { getMetamaskNetworkConfig, formatPayments, serializeInvokeParams, toMetamaskTypedData } from './utils';
 import metamaskApi from './metamask'
 
+
 export class ProviderMetamask implements Provider {
+    public isSignAndBroadcastByProvider = true;
+
     private _config: IProviderMetamaskConfig;
     // private mmOnboarding?: MetaMaskOnboarding;
 
@@ -63,8 +66,8 @@ export class ProviderMetamask implements Provider {
         return Promise.resolve();
     }
 
-    public async signAndBroadCast(list: Array<SignerTx>): Promise<Array<any>> {
-        this.__log('signAndBroadCast :: ', list);
+    public async sign(list: Array<SignerTx>): Promise<Array<any>> {
+        this.__log('sign');
 
         return Promise.all(list.map(this.signOneTx, this))
             .then((txList) => {
@@ -74,12 +77,6 @@ export class ProviderMetamask implements Provider {
                     return txList;
                 }
             });
-    }
-
-    public async sign(list: Array<SignerTx>): Promise<Array<any>> {
-        this.__log('sign');
-
-        return this.signAndBroadCast(list);
     }
 
     public async signTypedData(data: Array<TypedData>): Promise<MetamaskSign> {
