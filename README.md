@@ -94,7 +94,7 @@ const orderData = {
   orderType: 'sell',
   version: 4,
   assetPair: {
-    amountAsset: 100000,
+    amountAsset: '8KTfWNoWYf9bP3hg1QYBLpkk9tgRb5wiUZnT1HUiNa9r',
     priceAsset: 500000,
   },
   price: 100000,
