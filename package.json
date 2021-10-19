@@ -1,6 +1,6 @@
 {
   "name": "@waves/provider-metamask",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "main": "dist/provider-metamask.js",
   "types": "dist/index.d.ts",
   "repository": {
@@ -21,18 +21,16 @@
   "dependencies": {
     "@metamask/detect-provider": "^1.2.0",
     "@metamask/onboarding": "^1.0.1",
-    "@types/ramda": "^0.26.38",
-    "@waves/node-api-js": "^1.2.5-beta.6",
-    "@waves/provider-metamask": "^0.0.2",
     "@waves/signer": "1.0.2",
-    "@waves/ts-types": "^1.0.2",
-    "ethers": "^5.4.7",
-    "node-forge": "^0.8.5"
+    "@waves/node-api-js": "^1.2.5-beta.6",
+    "ethers": "^5.4.7"
   },
   "devDependencies": {
+    "@waves/ts-types": "^1.0.2",
     "ts-loader": "^6.2.1",
     "typescript": "^3.7.4",
     "webpack": "^4.41.4",
+    "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^3.3.10"
   }
 }
