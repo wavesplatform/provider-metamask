@@ -9,7 +9,6 @@ export const getMetamaskNetworkConfig = (chainId: number): AddEthereumChainParam
 
         default: return null;
     }
-
 };
 
 const METAMASK_NETWORK_CONFIG_WAVES_MAINNET: AddEthereumChainParameter = {
