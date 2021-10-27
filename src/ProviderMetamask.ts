@@ -15,20 +15,22 @@ import { IUser, IProviderMetamaskConfig } from './ProviderMetamask.interface';
 import { EMetamaskError, IMMTypedData, MetamaskSign } from './Metamask.interface';
 import { DEFAULT_PROVIDER_CONFIG, DEFAULT_WAVES_CONFIG, ORDER_MODEL } from './config';
 import { getMetamaskNetworkConfig, formatPayments, serializeInvokeParams, toMetamaskTypedData } from './utils';
-import metamaskApi from './metamask'
-
+import metamaskApi, { isMetaMaskInstalled } from './metamask'
 
 export class ProviderMetamask implements Provider {
     public isSignAndBroadcastByProvider = true;
 
     private _config: IProviderMetamaskConfig;
-    // private mmOnboarding?: MetaMaskOnboarding;
 
     public user: IUser | null = null;
 
     constructor(config?: IProviderMetamaskConfig) {
         this._config = config || DEFAULT_PROVIDER_CONFIG;
         this._config.wavesConfig = { ...DEFAULT_WAVES_CONFIG, ...this._config.wavesConfig };
+
+        if(!isMetaMaskInstalled()) {
+            throw 'Metamask is not installed';
+        }
 
         this.__log('constructor', this._config);
     }

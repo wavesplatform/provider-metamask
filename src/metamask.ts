@@ -18,13 +18,11 @@ import { toEthereumAmount } from './utils';
 const BYTE_CODE = '0x';
 
 // @ts-ignore
-const ethereumApi = ethereum;
+const ethereumApi = window['ethereum'];
 
 const metamaskApi = {
 
     _accounts: [],
-
-    isMetaMaskInstalled: MetaMaskOnboarding.isMetaMaskInstalled,
 
     // detectEthereumProvider: async (): Promise<boolean> => {
     //     const provider = await metamaskDetectProvider();
@@ -276,5 +274,7 @@ const metamaskApi = {
     // },
 
 }
+
+export const isMetaMaskInstalled = () => MetaMaskOnboarding.isMetaMaskInstalled();
 
 export default metamaskApi;
