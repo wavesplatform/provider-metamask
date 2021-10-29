@@ -7,6 +7,7 @@ import { wavesAddress2eth } from '@waves/node-api-js';
 import {
     AddEthereumChainParameter,
     EthereumAddress,
+    IAbi,
     IContractMeta,
     IMMTypedData,
     MetamaskSign,
@@ -65,7 +66,7 @@ const metamaskApi = {
             throw data;
         }
 
-        const bankAbi = data;
+        const bankAbi: IAbi[] = data;
         const bankFactory = new ethers.ContractFactory(
             bankAbi,
             BYTE_CODE,
@@ -76,7 +77,7 @@ const metamaskApi = {
 
         return {
             contract,
-            abi: bankAbi[0]
+            abi: bankAbi
         };
     },
 

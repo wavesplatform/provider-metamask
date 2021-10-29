@@ -39,7 +39,7 @@ export interface IAbi {
 
 export interface IContractMeta {
     contract: ethers.Contract;
-    abi: IAbi;
+    abi: IAbi[];
 }
 
 export interface IMMTypedData {

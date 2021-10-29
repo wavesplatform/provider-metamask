@@ -1,0 +1,3 @@
+class BaseStore { }
+
+export { BaseStore };
