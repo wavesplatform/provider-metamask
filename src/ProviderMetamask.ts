@@ -14,7 +14,13 @@ import { TRANSACTION_TYPE } from '@waves/ts-types';
 import { IUser, IProviderMetamaskConfig } from './ProviderMetamask.interface';
 import { EMetamaskError, IMMTypedData, MetamaskSign } from './Metamask.interface';
 import { DEFAULT_PROVIDER_CONFIG, DEFAULT_WAVES_CONFIG, ORDER_MODEL } from './config';
-import { getMetamaskNetworkConfig, formatPayments, serializeInvokeParams, toMetamaskTypedData } from './utils';
+import {
+    getMetamaskNetworkConfig,
+    formatPayments,
+    findInvokeAbiByName,
+    serializeInvokeParams,
+    toMetamaskTypedData
+} from './utils';
 import metamaskApi, { isMetaMaskInstalled } from './metamask'
 
 export class ProviderMetamask implements Provider {
@@ -237,16 +243,17 @@ export class ProviderMetamask implements Provider {
         } else if (tx.type == TRANSACTION_TYPE.INVOKE_SCRIPT) {
             const txInvoke = tx;
             const call = txInvoke.call!;
-            const name = call.function;
+            const fnName = call.function;
             const dappAddress = txInvoke.dApp;
 
             const contract = await metamaskApi.createContract(dappAddress, wavesConfig.nodeUrl);
 
-            const paramsValues = serializeInvokeParams(call.args, contract.abi.inputs);
+            const abi = findInvokeAbiByName(contract.abi, fnName);
+            const paramsValues = serializeInvokeParams(call.args, abi!.inputs);
             const payments = formatPayments(txInvoke.payment || []);
 
-            this.__log('signOneTx :: invoke ', name, paramsValues, payments);
-            const txInfo = await contract.contract[name](
+            this.__log('signOneTx :: invoke ', fnName, paramsValues, payments);
+            const txInfo = await contract.contract[fnName](
                 ...paramsValues,
                 payments
             );
