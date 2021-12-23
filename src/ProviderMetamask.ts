@@ -10,16 +10,21 @@ import {
 } from '@waves/signer';
 import { ethAddress2waves, ethTxId2waves, wavesAddress2eth } from '@waves/node-api-js';
 import { TRANSACTION_TYPE } from '@waves/ts-types';
+import { base64Decode, base58Encode } from '@waves/ts-lib-crypto';
 
 import { IUser, IProviderMetamaskConfig } from './ProviderMetamask.interface';
-import { EMetamaskError, IMMTypedData, MetamaskSign } from './Metamask.interface';
+import { EMetamaskError, IMMTypedData, IOrderModel, MetamaskSign } from './Metamask.interface';
 import { DEFAULT_PROVIDER_CONFIG, DEFAULT_WAVES_CONFIG, ORDER_MODEL } from './config';
 import {
-    getMetamaskNetworkConfig,
+    assetToBytes,
     formatPayments,
     findInvokeAbiByName,
+    getMetamaskNetworkConfig,
+    makeVerifyingContract,
+    prepareAssetId,
+    publicKeyToBytes,
     serializeInvokeParams,
-    toMetamaskTypedData
+    toMetamaskTypedData,
 } from './utils';
 import metamaskApi, { isMetaMaskInstalled } from './metamask'
 
@@ -52,10 +57,15 @@ export class ProviderMetamask implements Provider {
         if(users?.length) {
             const ethAddr: string = users[0];
 
+            // base64 > base58
+            const publicKey = await metamaskApi.getEncryptionPublicKey(ethAddr);
+            const bytesFromBase64 = base64Decode(publicKey);
+            const base58String = base58Encode(bytesFromBase64);
+
             this.user = {
                 id: 0,
                 path: '',
-                publicKey: '',
+                publicKey: base58String,
                 address: ethAddress2waves(ethAddr, this._config.wavesConfig.chainId), //todo check to get from MM
                 statusCode: ''
             };
@@ -116,27 +126,32 @@ export class ProviderMetamask implements Provider {
 
     public async signOrder(order: any): Promise<MetamaskSign> {
         this.__log('signOrder :: ', order);
+        const chainId = this._config.wavesConfig.chainId;
 
-        const publicKey = await metamaskApi.getEncryptionPublicKey();
-        const orderToSign = {
+        order.matcherFeeAssetId = prepareAssetId(order.matcherFeeAssetId);
+        order.assetPair.amountAsset = prepareAssetId(order.assetPair.amountAsset);
+        order.assetPair.priceAsset = prepareAssetId(order.assetPair.priceAsset);
+
+        const orderToSign: IOrderModel = {
             ...ORDER_MODEL,
             ... {
                 domain: {
                     ...ORDER_MODEL.domain,
-                    chainId: this._config.wavesConfig.chainId
+                    chainId: chainId,
+                    verifyingContract: makeVerifyingContract(chainId),
                 },
                 message: {
                     "version": order.version,
-                    "matcherPublicKey": publicKey,
-                    "amountAsset": order.assetPair.amountAsset,
-                    "priceAsset": order.assetPair.priceAsset,
-                    "orderType": order.orderType,
+                    "orderType": order.orderType === 'sell' ? true : false,
+                    "matcherPublicKey": publicKeyToBytes(order.matcherPublicKey),
+                    "matcherFeeAssetId": assetToBytes(order.matcherFeeAssetId),
+                    "amountAsset": assetToBytes(order.assetPair.amountAsset),
+                    "priceAsset": assetToBytes(order.assetPair.priceAsset),
+                    "matcherFee": order.matcherFee,
                     "amount": order.amount || 0,
                     "price": order.price,
                     "timestamp": order.timestamp,
                     "expiration": order.expiration,
-                    "matcherFee": order.matcherFee,
-                    "matcherFeeAssetId": "WAVES",
                 }
             }
         };

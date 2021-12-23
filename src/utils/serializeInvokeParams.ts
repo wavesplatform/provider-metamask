@@ -70,7 +70,9 @@ const serializeInvokeParam = (abiInput: IAbiInput, value: any) => {
     const type = abiInput.type;
 
     switch (type) {
+        case EAbiInputTypes.ADDRESS:
         case EAbiInputTypes.BOOL:
+        case EAbiInputTypes.INT_32:
         case EAbiInputTypes.INT_64:
         case EAbiInputTypes.STRING:
             return value;

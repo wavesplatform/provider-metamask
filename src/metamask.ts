@@ -37,13 +37,11 @@ const metamaskApi = {
     //     }
     // },
 
-    getEncryptionPublicKey: async function() {
-        const from = this._accounts[0];
-
+    getEncryptionPublicKey: async function(ethAddress) {
         try {
           const result = await ethereumApi.request({
             method: 'eth_getEncryptionPublicKey',
-            params: [from],
+            params: [ethAddress],
           });
 
           return result;
