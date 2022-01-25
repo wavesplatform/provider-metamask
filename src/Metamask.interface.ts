@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { EPriceMode } from './ProviderMetamask.interface';
 
 export type EthereumAddress = string;
 export type TupleCortege = any[];
@@ -85,7 +86,7 @@ export interface IOrderModel {
     };
     message: {
         version: number;
-        orderType: boolean;
+        orderType: string;
         matcherPublicKey: string;
         matcherFeeAssetId: string;
         amountAsset: string;
@@ -95,5 +96,6 @@ export interface IOrderModel {
         price: number;
         timestamp: number;
         expiration: number;
+        priceMode: EPriceMode;
     }
   }

@@ -1,4 +1,5 @@
 import { EAbiInputTypes, IOrderModel } from '../Metamask.interface';
+import { EPriceMode } from '../ProviderMetamask.interface';
 
 export const ORDER_MODEL: IOrderModel = {
     "types": {
@@ -27,23 +28,23 @@ export const ORDER_MODEL: IOrderModel = {
         },
         {
           "name": "orderType",
-          "type": EAbiInputTypes.BOOL
+          "type": EAbiInputTypes.STRING
         },
         {
           "name": "matcherPublicKey",
-          "type": EAbiInputTypes.BYTES
+          "type": EAbiInputTypes.STRING
         },
         {
           "name": "matcherFeeAssetId",
-          "type": EAbiInputTypes.BYTES
+          "type": EAbiInputTypes.STRING
         },
         {
           "name": "amountAsset",
-          "type": EAbiInputTypes.BYTES
+          "type": EAbiInputTypes.STRING
         },
         {
           "name": "priceAsset",
-          "type": EAbiInputTypes.BYTES
+          "type": EAbiInputTypes.STRING
         },
         {
           "name": "matcherFee",
@@ -64,6 +65,10 @@ export const ORDER_MODEL: IOrderModel = {
         {
           "name": "expiration",
           "type": EAbiInputTypes.INT_64
+        },
+        {
+          "name": "priceMode",
+          "type": EAbiInputTypes.STRING
         }
       ]
     },
@@ -72,21 +77,22 @@ export const ORDER_MODEL: IOrderModel = {
       "name": "Waves Exchange",
       "version": "1",
       "chainId": 67,
-      "verifyingContract": "0x4343434343434343434343434343434343434343"
+      "verifyingContract": "", // 0x4343434343434343434343434343434343434343
     },
 
     // https://confluence.wavesplatform.com/pages/viewpage.action?pageId=1680808498#id-78.Metamask-Order
     "message": {
       "version": 4,
-      "orderType": false, // buy — false, sell — true
-      "matcherPublicKey": '0x',
-      "matcherFeeAssetId": '0x',
-      "amountAsset": '0x',
-      "priceAsset": '0x',
+      "orderType": 'SELL',
+      "matcherPublicKey": '',
+      "matcherFeeAssetId": '',
+      "amountAsset": '',
+      "priceAsset": '',
       "matcherFee": 0, //300000,
       "amount": 0, // 10000000,
       "price": 0, //100000000,
       "timestamp": 0, //1628254368949,
       "expiration": 0, // 1629982368949,
+      "priceMode": EPriceMode.ASSET_DECIMALS,
     }
 };

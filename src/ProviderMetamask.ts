@@ -12,17 +12,15 @@ import { ethAddress2waves, ethTxId2waves, wavesAddress2eth } from '@waves/node-a
 import { TRANSACTION_TYPE } from '@waves/ts-types';
 import { base64Decode, base58Encode } from '@waves/ts-lib-crypto';
 
-import { IUser, IProviderMetamaskConfig } from './ProviderMetamask.interface';
+import { EPriceMode, IUser, IProviderMetamaskConfig } from './ProviderMetamask.interface';
 import { EMetamaskError, IMMTypedData, IOrderModel, MetamaskSign } from './Metamask.interface';
 import { DEFAULT_PROVIDER_CONFIG, DEFAULT_WAVES_CONFIG, ORDER_MODEL } from './config';
 import {
-    assetToBytes,
     formatPayments,
     findInvokeAbiByName,
     getMetamaskNetworkConfig,
     makeVerifyingContract,
     prepareAssetId,
-    publicKeyToBytes,
     serializeInvokeParams,
     toMetamaskTypedData,
 } from './utils';
@@ -142,16 +140,17 @@ export class ProviderMetamask implements Provider {
                 },
                 message: {
                     "version": order.version,
-                    "orderType": order.orderType === 'sell' ? true : false,
-                    "matcherPublicKey": publicKeyToBytes(order.matcherPublicKey),
-                    "matcherFeeAssetId": assetToBytes(order.matcherFeeAssetId),
-                    "amountAsset": assetToBytes(order.assetPair.amountAsset),
-                    "priceAsset": assetToBytes(order.assetPair.priceAsset),
+                    "orderType": order.orderType,
+                    "matcherPublicKey": order.matcherPublicKey,
+                    "matcherFeeAssetId": order.matcherFeeAssetId,
+                    "amountAsset": order.assetPair.amountAsset,
+                    "priceAsset": order.assetPair.priceAsset,
                     "matcherFee": order.matcherFee,
-                    "amount": order.amount || 0,
+                    "amount": order.amount,
                     "price": order.price,
                     "timestamp": order.timestamp,
                     "expiration": order.expiration,
+                    "priceMode": EPriceMode.ASSET_DECIMALS,
                 }
             }
         };

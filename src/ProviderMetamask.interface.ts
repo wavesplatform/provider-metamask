@@ -20,3 +20,8 @@ export interface IProviderMetamaskConfig {
     debug?: boolean;
     wavesConfig: IWavesConfig;
 }
+
+export enum EPriceMode {
+    ASSET_DECIMALS = 'assetDecimals',
+    FIXED_DECIMALS = 'fixedDecimals',
+}

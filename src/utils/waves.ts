@@ -7,18 +7,18 @@ const WAVES_ASSET_STRING = 'WAVES';
 const ETHEREUM_DECIMALS = 18;
 
 // export const addressToBytes = (address: string) => bytesToHexString(base58Decode(address));
-export const assetToBytes = (assetId: string | null): string => {
-    return assetId === null ? WAVES_ASSET_ID_CONVERTED : bytesToHexString(base58Decode(assetId));
-};
+// export const assetToBytes = (assetId: string | null): string => {
+    // return assetId === null ? WAVES_ASSET_ID_CONVERTED : bytesToHexString(base58Decode(assetId));
+// };
 
-export const publicKeyToBytes = (publicKey: string): string =>  {
-    return bytesToHexString(base58Decode(publicKey));
-};
+// export const publicKeyToBytes = (publicKey: string): string =>  {
+//     return bytesToHexString(base58Decode(publicKey));
+// };
 
 export const makeVerifyingContract = (chainId: number): string => {
     // repeat 20 times
     const repeatedChain = new Array(20)
-        .fill(chainId)
+        .fill(chainId.toString(16))
         .join('');
 
     return `0x${repeatedChain}`;
@@ -52,5 +52,5 @@ export const toEthereumAmount = (amount: number, decimals: number): number => {
 };
 
 export const prepareAssetId = (assetId: string | null) => {
-    return assetId === WAVES_ASSET_STRING ? null : assetId;
+    return assetId === null ? 'WAVES' : assetId;
 };
