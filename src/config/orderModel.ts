@@ -27,15 +27,7 @@ export const ORDER_MODEL: IOrderModel = {
           "type": EAbiInputTypes.INT_32
         },
         {
-          "name": "orderType",
-          "type": EAbiInputTypes.STRING
-        },
-        {
           "name": "matcherPublicKey",
-          "type": EAbiInputTypes.STRING
-        },
-        {
-          "name": "matcherFeeAssetId",
           "type": EAbiInputTypes.STRING
         },
         {
@@ -47,8 +39,8 @@ export const ORDER_MODEL: IOrderModel = {
           "type": EAbiInputTypes.STRING
         },
         {
-          "name": "matcherFee",
-          "type": EAbiInputTypes.INT_64
+          "name": "orderType",
+          "type": EAbiInputTypes.STRING
         },
         {
           "name": "amount",
@@ -65,6 +57,14 @@ export const ORDER_MODEL: IOrderModel = {
         {
           "name": "expiration",
           "type": EAbiInputTypes.INT_64
+        },
+        {
+          "name": "matcherFee",
+          "type": EAbiInputTypes.INT_64
+        },
+        {
+          "name": "matcherFeeAssetId",
+          "type": EAbiInputTypes.STRING
         },
         {
           "name": "priceMode",
