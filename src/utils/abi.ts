@@ -1,6 +1,5 @@
 import { IAbi, IAbiOrderModel, IAbiSignMessageModel } from '../Metamask.interface';
 import { ORDER_MODEL, SIGN_MESSAGE } from '../config';
-import { ChainId } from '@waves/ts-types';
 
 export const findInvokeAbiByName = (abiList: IAbi[], name): IAbi | undefined => {
 	let abi: IAbi | undefined= abiList.find((item) => {
