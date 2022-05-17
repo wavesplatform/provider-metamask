@@ -117,3 +117,11 @@ import { wavesAddress2eth } from '@waves/node-api-js';
 const user = await signer.login();
 const ethereumAddress = wavesAddress2eth(user.address);
 ```
+
+### 6. How to sign message
+
+```js
+const message = 'message text';
+const provider = new ProviderMetamask();
+const sign = await provider.signMessage(message);
+```
