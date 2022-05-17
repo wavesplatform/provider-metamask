@@ -1,8 +1,8 @@
-import { EAbiInputTypes, IOrderModel } from '../../Metamask.interface';
+import { EAbiInputTypes, IAbiOrderModel } from '../../Metamask.interface';
 import { EPriceMode } from '../../ProviderMetamask.interface';
 
 
-export const ORDER_MODEL: IOrderModel = {
+export const ORDER_MODEL: IAbiOrderModel = {
 	"types": {
 		"EIP712Domain": [
 			{
@@ -73,14 +73,13 @@ export const ORDER_MODEL: IOrderModel = {
 			}
 		]
 	},
-	"primaryType": "Order",
 	"domain": {
 		"name": "Waves Exchange",
 		"version": "1",
 		"chainId": 67,
 		"verifyingContract": "", // 0x4343434343434343434343434343434343434343
 	},
-
+	"primaryType": "Order",
 	// https://confluence.wavesplatform.com/pages/viewpage.action?pageId=1680808498#id-78.Metamask-Order
 	"message": {
 		"version": 4,

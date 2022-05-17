@@ -72,30 +72,40 @@ export enum EMetamaskError {
 	CHAIN_NOT_ADDED = 4902, // This error code indicates that the chain has not been added to MetaMask.
 }
 
-export interface IOrderModel {
+interface IAbiCommon<KEY, TIMessage> {
 	types: {
 		EIP712Domain: IAbiInput[];
-		Order: IAbiInput[];
+		Order?: IAbiInput[]; // TODO typing
+		Message?: IAbiInput[]; // TODO typing
 	};
-	primaryType: 'Order';
+	primaryType: KEY;
 	domain: {
 		name: string;
 		version: string;
 		chainId: number;
 		verifyingContract: string;
 	};
-	message: {
-		version: number;
-		orderType: string;
-		matcherPublicKey: string;
-		matcherFeeAssetId: string;
-		amountAsset: string;
-		priceAsset: string;
-		matcherFee: number;
-		amount: number;
-		price: number;
-		timestamp: number;
-		expiration: number;
-		priceMode: EPriceMode;
-	}
+	message: TIMessage;
 }
+
+interface IAbiOrderMessage {
+	version: number;
+	orderType: string;
+	matcherPublicKey: string;
+	matcherFeeAssetId: string;
+	amountAsset: string;
+	priceAsset: string;
+	matcherFee: number;
+	amount: number;
+	price: number;
+	timestamp: number;
+	expiration: number;
+	priceMode: EPriceMode;
+}
+
+interface IAbiSignMessageMessage {
+	text: string;
+}
+
+export type IAbiOrderModel = IAbiCommon<'Order', IAbiOrderMessage>;
+export type IAbiSignMessageModel = IAbiCommon<'Message', IAbiSignMessageMessage>;
