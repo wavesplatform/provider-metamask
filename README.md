@@ -25,33 +25,33 @@ Add library initialization to your app.
 
 * For Stagenet:
 
-   ```js
-   import { Signer } from '@waves/signer';
-   import { ProviderMetamask } from '@waves/provider-metamask';
+	```js
+	import { Signer } from '@waves/signer';
+	import { ProviderMetamask } from '@waves/provider-metamask';
 
-   const signer = new Signer({
-     // Specify URL of the node on Stagenet
-     NODE_URL: 'https://nodes-stagenet.wavesnodes.com'
-   });
-   const provider = new ProviderMetamask({
-        wavesConfig: {
-            nodeUrl: 'https://nodes-stagenet.wavesnodes.com',
-            chainId: 'S'.charCodeAt(0)
-        }
-   });
-   signer.setProvider(provider);
-   ```
+	const signer = new Signer({
+		// Specify URL of the node on Stagenet
+		NODE_URL: 'https://nodes-stagenet.wavesnodes.com'
+	});
+	const provider = new ProviderMetamask({
+		wavesConfig: {
+			nodeUrl: 'https://nodes-stagenet.wavesnodes.com',
+			chainId: 'S'.charCodeAt(0)
+		}
+	});
+	signer.setProvider(provider);
+	```
 
 * For Mainnet:
 
-   ```js
-   import { Signer } from '@waves/signer';
-   import { ProviderMetamask } from '@waves/provider-metamask';
+	```js
+	import { Signer } from '@waves/signer';
+	import { ProviderMetamask } from '@waves/provider-metamask';
 
-   const signer = new Signer();
-   const provider = new ProviderMetamask();
-   signer.setProvider(provider);
-   ```
+	const signer = new Signer();
+	const provider = new ProviderMetamask();
+	signer.setProvider(provider);
+	```
 
 ### 3. Basic example
 
@@ -61,8 +61,8 @@ Now your application is ready to work with Waves Platform. Let's test it by impl
 const user = await signer.login();
 const [transfer] = await signer
   .transfer({
-    amount: 1,
-    recipient: 'alias:T:merry',
+	amount: 1,
+	recipient: 'alias:T:merry',
   })
   .broadcast();
 ```
@@ -71,12 +71,12 @@ const [transfer] = await signer
 const user = await signer.login();
 const [invoke] = await signer
   .invoke({
-    dApp: "3F4bY4PsS8E1tShx9ruSYthie3uzYiSffSv",
-    call:{
-      function: "deposit",
-      args:[{ type: "string", value: "string" }]
-    },
-    payment:[]
+	dApp: "3F4bY4PsS8E1tShx9ruSYthie3uzYiSffSv",
+	call:{
+		 function: "deposit",
+		 args:[{ type: "string", value: "string" }]
+	},
+	payment:[]
   })
   .broadcast();
 ```
@@ -94,8 +94,8 @@ const orderData = {
   orderType: 'sell',
   version: 4,
   assetPair: {
-    amountAsset: '8KTfWNoWYf9bP3hg1QYBLpkk9tgRb5wiUZnT1HUiNa9r',
-    priceAsset: 'WAVES',
+	amountAsset: '8KTfWNoWYf9bP3hg1QYBLpkk9tgRb5wiUZnT1HUiNa9r',
+	priceAsset: 'WAVES',
   },
   price: 100000,
   amount: 100000,

@@ -8,13 +8,13 @@ const Component = MTextField;
 
 export class Textfield extends React.Component<IProps> {
 
-    render() {
-        const { children, ...props } = this.props;
+	render() {
+		const { children, ...props } = this.props;
 
-        return (
-            <Component {...props}>
-                {children}
-            </Component>
-        );
-    }
+		return (
+			<Component {...props}>
+				{children}
+			</Component>
+		);
+	}
 }
