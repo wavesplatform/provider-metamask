@@ -8,9 +8,9 @@ const Component = MButton;
 
 export class Button extends React.Component<IProps> {
 
-    render() {
-        const { children, ...props } = this.props;
+	render() {
+		const { children, ...props } = this.props;
 
-        return <Component variant="contained" {...props}>{children}</Component>;
-    }
+		return <Component variant="contained" {...props}>{children}</Component>;
+	}
 }

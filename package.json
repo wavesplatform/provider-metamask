@@ -4,33 +4,33 @@
   "main": "dist/provider-metamask.js",
   "types": "dist/index.d.ts",
   "repository": {
-    "type": "git",
-    "url": "https://github.com/wavesplatform/provider-metamask"
+	"type": "git",
+	"url": "https://github.com/wavesplatform/provider-metamask"
   },
   "bugs": {
-    "url": "https://github.com/wavesplatform/provider-metamask/issues"
+	"url": "https://github.com/wavesplatform/provider-metamask/issues"
   },
   "files": [
-    "dist"
+	"dist"
   ],
   "scripts": {
-    "watch": "webpack --watch",
-    "build": "webpack",
-    "test": "jest"
+	"watch": "webpack --watch",
+	"build": "webpack",
+	"test": "jest"
   },
   "dependencies": {
-    "@metamask/detect-provider": "^1.2.0",
-    "@metamask/onboarding": "^1.0.1",
-    "@waves/signer": "1.0.5",
-    "@waves/node-api-js": "^1.2.5-beta.6",
-    "ethers": "^5.4.7"
+	"@metamask/detect-provider": "^1.2.0",
+	"@metamask/onboarding": "^1.0.1",
+	"@waves/signer": "1.0.5",
+	"@waves/node-api-js": "^1.2.5-beta.6",
+	"ethers": "^5.4.7"
   },
   "devDependencies": {
-    "@waves/ts-types": "^1.0.2",
-    "ts-loader": "^6.2.1",
-    "typescript": "^3.7.4",
-    "webpack": "^4.41.4",
-    "webpack-bundle-analyzer": "^4.5.0",
-    "webpack-cli": "^3.3.10"
+	"@waves/ts-types": "^1.0.2",
+	"ts-loader": "^6.2.1",
+	"typescript": "^3.7.4",
+	"webpack": "^4.41.4",
+	"webpack-bundle-analyzer": "^4.5.0",
+	"webpack-cli": "^3.3.10"
   }
 }

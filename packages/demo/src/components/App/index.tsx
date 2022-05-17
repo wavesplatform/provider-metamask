@@ -11,17 +11,9 @@ interface IProps { }
 @observer
 class App extends React.Component<IProps> {
 
-    // render() {
-    //     return (
-    //         <Router history={createBrowserHistory()}>
-    //             <Route path="/" component={MainContainer}/>
-    //         </Router>
-    //     );
-    // }
-
-    render() {
-        return (<MainContainer />);
-    }
+	render() {
+		return (<MainContainer />);
+	}
 }
 
 export { App };
