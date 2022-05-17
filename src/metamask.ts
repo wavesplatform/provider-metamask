@@ -11,6 +11,7 @@ import {
 	IContractMeta,
 	IMMTypedData,
 	MetamaskSign,
+	IAbiOrderModel,
 } from './Metamask.interface';
 
 import { ABI_TRANSFER_CUSTOM_TOKEN } from './config';
@@ -211,7 +212,7 @@ const metamaskApi = {
 		return result;
 	},
 
-	signOrder: async function(order: any): Promise<MetamaskSign> {
+	signOrder: async function(order: IAbiOrderModel): Promise<MetamaskSign> {
 		return this.signTypedDataV4(JSON.stringify(order));
 	},
 
