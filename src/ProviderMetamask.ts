@@ -118,7 +118,7 @@ export class ProviderMetamask implements Provider {
 			verifyingContract: makeVerifyingContract(chainId),
 		}, { text: data });
 
-		this.__log('signMessage :: metamaskApi.signOrder :: ', messageToSign);
+		this.__log('signMessage :: metamaskApi.signMessage :: ', messageToSign);
 		const sign = await metamaskApi.signTypedDataV4(JSON.stringify(messageToSign));
 		this.__log('signMessage :: result :: ', sign);
 
