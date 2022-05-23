@@ -80,17 +80,17 @@ interface IAbiCommon<KEY, TIMessage> {
 	};
 	primaryType: KEY;
 	domain: {
-		name: string;
-		version: string;
 		chainId: number;
-		verifyingContract: string;
+		version?: string;
+		name?: string;
+		// verifyingContract: string;
 	};
 	message: TIMessage;
 }
 
 interface IAbiOrderMessage {
 	version: number;
-	orderType: string;
+	orderType: 'BUY' | 'SELL';
 	matcherPublicKey: string;
 	matcherFeeAssetId: string;
 	amountAsset: string;

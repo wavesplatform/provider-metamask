@@ -16,10 +16,6 @@ export const ORDER_MODEL: IAbiOrderModel = {
 			{
 				"name": "chainId",
 				"type": EAbiInputTypes.UINT_256
-			},
-			{
-				"name": "verifyingContract",
-				"type": EAbiInputTypes.ADDRESS
 			}
 		],
 		"Order": [
@@ -74,10 +70,9 @@ export const ORDER_MODEL: IAbiOrderModel = {
 		]
 	},
 	"domain": {
-		"name": "Waves Exchange",
+		"name": "Waves Order",
 		"version": "1",
-		"chainId": 67,
-		"verifyingContract": "", // 0x4343434343434343434343434343434343434343
+		"chainId": 83,
 	},
 	"primaryType": "Order",
 	// https://confluence.wavesplatform.com/pages/viewpage.action?pageId=1680808498#id-78.Metamask-Order

@@ -8,24 +8,25 @@ import {
 	TypedData,
 	UserData
 } from '@waves/signer';
-import { ethAddress2waves, ethTxId2waves, wavesAddress2eth } from '@waves/node-api-js';
+import { ethAddress2waves, ethTxId2waves, wavesAddress2eth, wavesAsset2Eth } from '@waves/node-api-js';
 import { TRANSACTION_TYPE } from '@waves/ts-types';
 import { base64Decode, base58Encode } from '@waves/ts-lib-crypto';
 
-import { EPriceMode, IUser, IProviderMetamaskConfig } from './ProviderMetamask.interface';
+import { EPriceMode, IUser, IProviderMetamaskConfig, IOrderData } from './ProviderMetamask.interface';
 import { EMetamaskError, IMMTypedData, IAbiOrderModel, MetamaskSign } from './Metamask.interface';
-import { DEFAULT_PROVIDER_CONFIG, DEFAULT_WAVES_CONFIG, ORDER_MODEL } from './config';
+import { DEFAULT_PROVIDER_CONFIG, DEFAULT_WAVES_CONFIG } from './config';
 import {
 	formatPayments,
 	findInvokeAbiByName,
 	getMetamaskNetworkConfig,
-	makeVerifyingContract,
 	prepareAssetId,
 	serializeInvokeParams,
 	toMetamaskTypedData,
 	makeAbiOrderModel,
 	makeAbiSignMessageModel,
+	cloneObj,
 } from './utils';
+import { verifyOrder } from './helpers';
 import metamaskApi, { isMetaMaskInstalled } from './metamask'
 
 export class ProviderMetamask implements Provider {
@@ -115,7 +116,6 @@ export class ProviderMetamask implements Provider {
 
 		const messageToSign = makeAbiSignMessageModel({
 			chainId: chainId,
-			verifyingContract: makeVerifyingContract(chainId),
 		}, { text: data });
 
 		this.__log('signMessage :: metamaskApi.signMessage :: ', messageToSign);
@@ -125,17 +125,27 @@ export class ProviderMetamask implements Provider {
 		return sign;
 	}
 
-	public async signOrder(order: any): Promise<MetamaskSign> {
-		this.__log('signOrder :: ', order);
+	public async signOrder(orderData: IOrderData): Promise<MetamaskSign> {
+		this.__log('signOrder :: ', orderData);
+		
+		const order = cloneObj(orderData);
 		const chainId = this._config.wavesConfig.chainId;
 
 		order.matcherFeeAssetId = prepareAssetId(order.matcherFeeAssetId);
 		order.assetPair.amountAsset = prepareAssetId(order.assetPair.amountAsset);
 		order.assetPair.priceAsset = prepareAssetId(order.assetPair.priceAsset);
 
+		if (order.orderType) {
+			order.orderType = String(order.orderType).toUpperCase();
+		}
+
+		const verify = verifyOrder(order);
+		if (verify.status === false) {
+			throw new Error(verify.message);
+		}
+
 		const orderToSign: IAbiOrderModel = makeAbiOrderModel({
 			chainId: chainId,
-			verifyingContract: makeVerifyingContract(chainId),
 		},{
 			"version": order.version,
 			"orderType": order.orderType,
@@ -149,7 +159,7 @@ export class ProviderMetamask implements Provider {
 			"timestamp": order.timestamp,
 			"expiration": order.expiration,
 			"priceMode": EPriceMode.ASSET_DECIMALS,
-		})
+		});
 
 		this.__log('signOrder :: metamaskApi.signOrder :: ', orderToSign);
 		const result = await metamaskApi.signOrder(orderToSign);
@@ -223,7 +233,7 @@ export class ProviderMetamask implements Provider {
 		if(tx.type == TRANSACTION_TYPE.TRANSFER) {
 			let sign;
 
-			if(tx.assetId === 'WAVES') {
+			if(tx.assetId === 'WAVES' || tx.assetId === undefined) {
 				tx.assetId = null;
 			}
 
@@ -234,7 +244,7 @@ export class ProviderMetamask implements Provider {
 				);
 			} else {
 				const txInfo = await metamaskApi.transferAsset(
-					tx.assetId!, // todo convert to ethereum asset
+					wavesAsset2Eth(tx.assetId),
 					wavesAddress2eth(tx.recipient),
 					String(tx.amount)
 				);

@@ -14,7 +14,7 @@ import {
 	IAbiOrderModel,
 } from './Metamask.interface';
 
-import { ABI_TRANSFER_CUSTOM_TOKEN } from './config';
+import { ABI_TRANSFER_CUSTOM_TOKEN } from './helpers';
 import { toEthereumAmount } from './utils';
 
 const BYTE_CODE = '0x';

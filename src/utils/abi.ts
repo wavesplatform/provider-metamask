@@ -1,5 +1,6 @@
 import { IAbi, IAbiOrderModel, IAbiSignMessageModel } from '../Metamask.interface';
-import { ORDER_MODEL, SIGN_MESSAGE } from '../config';
+import { cloneObj } from '../utils';
+import { ORDER_MODEL, SIGN_MESSAGE_MODEL } from '../helpers';
 
 export const findInvokeAbiByName = (abiList: IAbi[], name): IAbi | undefined => {
 	let abi: IAbi | undefined= abiList.find((item) => {
@@ -10,14 +11,18 @@ export const findInvokeAbiByName = (abiList: IAbi[], name): IAbi | undefined => 
 };
 
 export const makeAbiOrderModel = (
-	domain: Pick<IAbiOrderModel["domain"], 'chainId' | 'verifyingContract'>,
-	message: IAbiOrderModel["message"]
+	domainData: Pick<IAbiOrderModel["domain"], 'chainId'>,
+	messageData: IAbiOrderModel["message"]
 ): IAbiOrderModel => {
+	const orderModel = cloneObj(ORDER_MODEL);
+	const domain = cloneObj(domainData);
+	const message = cloneObj(messageData);
+
 	const abiOrderModel: IAbiOrderModel = {
-		...ORDER_MODEL,
+		...orderModel,
 		...{
 			domain: {
-				...ORDER_MODEL.domain,
+				...orderModel.domain,
 				...domain
 			},
 			message: {
@@ -26,18 +31,22 @@ export const makeAbiOrderModel = (
 		}
 	};
 
-	return abiOrderModel;
+	return cloneObj(abiOrderModel);
 };
 
 export const makeAbiSignMessageModel = (
-	domain: Pick<IAbiSignMessageModel["domain"], 'chainId' | 'verifyingContract'>,
-	message: IAbiSignMessageModel["message"]
+	domainData: Pick<IAbiSignMessageModel["domain"], 'chainId' >,
+	messageData: IAbiSignMessageModel["message"]
 ): IAbiSignMessageModel => {
+	const signMessage = cloneObj(SIGN_MESSAGE_MODEL);
+	const domain = cloneObj(domainData);
+	const message = cloneObj(messageData);
+
 	const abiSignMessageModel: IAbiSignMessageModel = {
-		...SIGN_MESSAGE,
+		...signMessage,
 		...{
 			domain: {
-				...SIGN_MESSAGE.domain,
+				...signMessage.domain,
 				...domain
 			},
 			message: {
@@ -46,5 +55,5 @@ export const makeAbiSignMessageModel = (
 		}
 	};
 
-	return abiSignMessageModel;
+	return cloneObj(abiSignMessageModel);
 };

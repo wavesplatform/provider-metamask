@@ -19,7 +19,7 @@ const mock = {
 		{ type: 'binary', key: 'binary', value: '0x0000' }
 	],
 	orderData: {
-		orderType: 'sell',
+		orderType: 'SELL',
 		version: 4,
 		assetPair: {
 			amountAsset: 100000,
