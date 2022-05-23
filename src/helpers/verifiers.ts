@@ -4,11 +4,11 @@ export const verifyOrder = (order) => {
 		message: '',
 	};
 
-	const orderType = String(order.orederType).toUpperCase();
+	const orderType = String(order.orderType).toUpperCase();
 	if (orderType !== 'SELL' && orderType !== 'BUY') {
 		verified = {
 			status: false,
-			message: `Invalid Order.orderType: ${String(order.orederType)}`
+			message: `Invalid Order.orderType: ${String(order.orderType)}`
 		};
 	}
 
