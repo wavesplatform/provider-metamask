@@ -48,7 +48,7 @@ export const formatPayments = (payments: any[]): any[] => {
 };
 
 export const toEthereumAmount = (amount: number, decimals: number): number => {
-	return amount * ( 10 ** (ETHEREUM_DECIMALS - decimals + 1)); // TODO - 1
+	return amount * ( 10 ** (ETHEREUM_DECIMALS - decimals));
 };
 
 export const prepareAssetId = (assetId: string | null) => {

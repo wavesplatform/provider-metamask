@@ -163,7 +163,7 @@ const metamaskApi = {
 	/* sendEIP1559 */
 	async transferWaves(recipient: EthereumAddress, amount: string): Promise<MetamaskSign> {
 		const WAVES_DECIMALS = 8;
-		const ethAmount = toEthereumAmount(Number(amount), 8);
+		const ethAmount = toEthereumAmount(Number(amount), WAVES_DECIMALS);
 		const amountInHex = `0x${ethAmount.toString(16)}`;
 
 		const from = this._accounts[0];
