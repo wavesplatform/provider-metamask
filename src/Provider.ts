@@ -12,7 +12,7 @@ import { ethAddress2waves, ethTxId2waves, wavesAddress2eth, wavesAsset2Eth } fro
 import { TRANSACTION_TYPE } from '@waves/ts-types';
 import { base64Decode, base58Encode } from '@waves/ts-lib-crypto';
 
-import { IUser, IProviderMetamaskConfig, IOrderData } from './ProviderMetamask.interface';
+import { IUser, IProviderMetamaskConfig, IOrderData } from './Provider.interface';
 import { EMetamaskError, IMMTypedData, IAbiOrderModel, MetamaskSign } from './Metamask.interface';
 import { DEFAULT_PROVIDER_CONFIG, DEFAULT_WAVES_CONFIG } from './config';
 import {
@@ -134,13 +134,14 @@ export class ProviderMetamask implements Provider {
 		order.matcherFeeAssetId = prepareAssetId(order.matcherFeeAssetId);
 		order.assetPair.amountAsset = prepareAssetId(order.assetPair.amountAsset);
 		order.assetPair.priceAsset = prepareAssetId(order.assetPair.priceAsset);
-		if (order.orderType) {
-			order.orderType = String(order.orderType).toUpperCase();
-		}
 
 		const validate = validateOrder(order);
 		if (validate.status === false) {
 			throw new Error(validate.message);
+		}
+
+		if (order.orderType) {
+			order.orderType = String(order.orderType).toUpperCase();
 		}
 
 		const orderToSign: IAbiOrderModel = makeAbiOrderModel({

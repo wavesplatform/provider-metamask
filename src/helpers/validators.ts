@@ -1,10 +1,11 @@
+import { EPriceMode } from '../Provider.interface';
 interface IValidateOrderResult {
 	status: boolean;
 	message?: string;
 }
 
 const SUPPORTED_ORDER_VERSION = 4;
-const SUPPORTED_PRICE_MODE = ['assetDecimals', 'fixedDecimals'];
+const SUPPORTED_PRICE_MODE = [EPriceMode.ASSET_DECIMALS, EPriceMode.FIXED_DECIMALS];
 const SUPPORTED_ORDER_TYPE = ['BUY', 'SELL'];
 
 export const validateOrder = (order): IValidateOrderResult => {
@@ -19,17 +20,18 @@ export const validateOrder = (order): IValidateOrderResult => {
 		};
 	}
 
-	if (!SUPPORTED_ORDER_TYPE.includes(order.orderType)) {
+	const orderType = String(order.orderType).toUpperCase();
+	if (!SUPPORTED_ORDER_TYPE.includes(orderType)) {
 		return {
 			status: false,
-			message: `Invalid Order.orderType: ${String(order.orderType)}`,
+			message: `Invalid field orderType: "${String(order.orderType)}"\nSupports: ${SUPPORTED_ORDER_TYPE.join(' | ')}`,
 		};
 	}
 
 	if (order.hasOwnProperty('priceMode') && !SUPPORTED_PRICE_MODE.includes(order.priceMode)) {
 		return {
 			status: false,
-			message: `Invalid field "priceMode": ${order.priceMode}\nAvailable values: ${SUPPORTED_PRICE_MODE.join(' | ')}`,
+			message: `Invalid field priceMode: "${order.priceMode}"\nSupports: ${SUPPORTED_PRICE_MODE.join(' | ')}`,
 		};
 	}
 

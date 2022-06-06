@@ -1,5 +1,5 @@
-import { EAbiInputTypes, IAbiOrderModel } from '../../Metamask.interface';
-import { EPriceMode } from '../../ProviderMetamask.interface';
+import { EAbiInputTypes, EMetamaskPriceMode, IAbiOrderModel } from '../../Metamask.interface';
+import { EPriceMode } from '../../Provider.interface';
 
 
 export const ORDER_MODEL: IAbiOrderModel = {
@@ -88,6 +88,6 @@ export const ORDER_MODEL: IAbiOrderModel = {
 		"price": 0, //100000000,
 		"timestamp": 0, //1628254368949,
 		"expiration": 0, // 1629982368949,
-		"priceMode": EPriceMode.ASSET_DECIMALS,
+		"priceMode": EMetamaskPriceMode.FIXED_DECIMALS,
 	}
 };

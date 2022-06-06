@@ -1,6 +1,6 @@
-import { ProviderMetamask as CProviderMetamask } from './ProviderMetamask';
+import { ProviderMetamask as CProviderMetamask } from './Provider';
 
-export  * from './ProviderMetamask.interface';
+export  * from './Provider.interface';
 export { isMetaMaskInstalled } from './metamask';
 
 export const ProviderMetamask = CProviderMetamask;
