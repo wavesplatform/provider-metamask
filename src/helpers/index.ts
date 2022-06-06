@@ -1,2 +1,3 @@
 export * from './abi';
-export * from './verifiers';
+export * from './metamaskConverters';
+export * from './validators';

@@ -22,8 +22,8 @@ export interface IProviderMetamaskConfig {
 }
 
 export enum EPriceMode {
-	ASSET_DECIMALS = 'ASSET_DECIMALS', // 'assetDecimals',
-	FIXED_DECIMALS = 'FIXED_DECIMALS', // 'fixedDecimals',
+	ASSET_DECIMALS = 'assetDecimals',
+	FIXED_DECIMALS = 'fixedDecimals',
 }
 
 export type IOrderData = any;

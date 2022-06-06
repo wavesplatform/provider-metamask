@@ -1,5 +1,4 @@
 import { ethers } from 'ethers';
-import { EPriceMode } from './ProviderMetamask.interface';
 
 export type EthereumAddress = string;
 export type TupleCortege = any[];
@@ -72,6 +71,11 @@ export enum EMetamaskError {
 	CHAIN_NOT_ADDED = 4902, // This error code indicates that the chain has not been added to MetaMask.
 }
 
+export enum EMetamaskPriceMode {
+	ASSET_DECIMALS = 'ASSET_DECIMALS',
+	FIXED_DECIMALS = 'FIXED_DECIMALS',
+}
+
 interface IAbiCommon<KEY, TIMessage> {
 	types: {
 		EIP712Domain: IAbiInput[];
@@ -100,7 +104,7 @@ interface IAbiOrderMessage {
 	price: number;
 	timestamp: number;
 	expiration: number;
-	priceMode: EPriceMode;
+	priceMode: EMetamaskPriceMode;
 }
 
 interface IAbiSignMessageMessage {

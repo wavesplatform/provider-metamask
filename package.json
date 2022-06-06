@@ -1,6 +1,6 @@
 {
   "name": "@waves/provider-metamask",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "main": "dist/provider-metamask.js",
   "types": "dist/index.d.ts",
   "repository": {

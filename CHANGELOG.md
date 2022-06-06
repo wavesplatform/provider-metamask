@@ -2,6 +2,10 @@
 
 provider-metamask changelog
 
+## [1.0.9]
+	- Update: supports priceMode: assetDecimals | fixedDecimals
+	- Update: add validation for version, priceMode
+
 ## [1.0.8]
 	- Fix: asset decimals when transfer WAVES
 
