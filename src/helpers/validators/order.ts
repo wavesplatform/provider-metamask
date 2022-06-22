@@ -1,14 +1,11 @@
-import { EPriceMode } from '../Provider.interface';
-interface IValidateOrderResult {
-	status: boolean;
-	message?: string;
-}
+import { EPriceMode } from '../../Provider.interface';
+import { IValidationResult } from './interface';
 
 const SUPPORTED_ORDER_VERSION = 4;
 const SUPPORTED_PRICE_MODE = [EPriceMode.ASSET_DECIMALS, EPriceMode.FIXED_DECIMALS];
 const SUPPORTED_ORDER_TYPE = ['BUY', 'SELL'];
 
-export const validateOrder = (order): IValidateOrderResult => {
+export const validateOrder = (order): IValidationResult => {
 	let validation = {
 		status: true
 	};

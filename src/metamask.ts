@@ -12,6 +12,7 @@ import {
 	IMMTypedData,
 	MetamaskSign,
 	IAbiOrderModel,
+	IAbiSignTypedDataModel
 } from './Metamask.interface';
 
 import { ABI_TRANSFER_CUSTOM_TOKEN } from './helpers';
@@ -227,12 +228,21 @@ const metamaskApi = {
 		return sign;
 	},
 
-	signTypedData: async function(params: IMMTypedData[]): Promise<MetamaskSign> {
+	signTypedData: async function(data: IAbiSignTypedDataModel): Promise<MetamaskSign> {
+		// const from = this._accounts[0];
+
+		// const sign: MetamaskSign = await ethereumApi.request({
+		// 	method: 'eth_signTypedData',
+		// 	params: [params, from],
+		// });
+
+		// return sign;
+
 		const from = this._accounts[0];
 
-		const sign: MetamaskSign = await ethereumApi.request({
-			method: 'eth_signTypedData',
-			params: [params, from],
+		const sign = await ethereumApi.request({
+			method: 'eth_signTypedData_v4',
+			params: [from, data],
 		});
 
 		return sign;
