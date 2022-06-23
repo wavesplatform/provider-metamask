@@ -111,10 +111,10 @@ export class ProviderMetamask implements Provider {
 		}, { text: data });
 
 		this.__log('signMessage :: metamaskApi.signMessage :: ', abiSignMessage);
-		const sign = await metamaskApi.signTypedDataV4(JSON.stringify(abiSignMessage));
-		this.__log('signMessage :: sign :: ', sign);
+		const result = await metamaskApi.signTypedDataV4(JSON.stringify(abiSignMessage));
+		this.__log('signMessage :: result :: ', result);
 
-		return sign;
+		return result;
 	}
 
 	public async signTypedData(data: TypedData[]): Promise<MetamaskSign> {
@@ -131,10 +131,10 @@ export class ProviderMetamask implements Provider {
 		}, data);
 
 		this.__log('signTypedData :: metamaskApi.signTypedData ', abiSignTypedData);
-		const sign = await metamaskApi.signTypedDataV4(JSON.stringify(abiSignTypedData));
-		this.__log('signTypedData :: sign :: ', sign);
+		const result = await metamaskApi.signTypedDataV4(JSON.stringify(abiSignTypedData));
+		this.__log('signTypedData :: result :: ', result);
 
-		return sign;
+		return result;
 	}
 
 	public async signOrder(orderData: IOrderData): Promise<MetamaskSign> {
@@ -174,10 +174,10 @@ export class ProviderMetamask implements Provider {
 		});
 
 		this.__log('signOrder :: metamaskApi.signOrder :: ', abiOrderModel);
-		const sign = await metamaskApi.signTypedDataV4(JSON.stringify(abiOrderModel));
-		this.__log('signOrder :: sign :: ', sign);
+		const result = await metamaskApi.signTypedDataV4(JSON.stringify(abiOrderModel));
+		this.__log('signOrder :: result :: ', result);
 
-		return sign;
+		return result;
 	}
 
 	public async connect(options: ConnectOptions): Promise<void> {
