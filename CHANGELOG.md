@@ -2,6 +2,9 @@
 
 provider-metamask changelog
 
+## [1.1.0]
+	- Update: Use eth_signTypedData_v4 for sign typed data
+
 ## [1.0.9]
 	- Update: supports priceMode: assetDecimals | fixedDecimals
 	- Update: add validation for version, priceMode

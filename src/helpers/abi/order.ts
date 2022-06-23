@@ -1,6 +1,4 @@
 import { EAbiInputTypes, EMetamaskPriceMode, IAbiOrderModel } from '../../Metamask.interface';
-import { EPriceMode } from '../../Provider.interface';
-
 
 export const ORDER_MODEL: IAbiOrderModel = {
 	"types": {

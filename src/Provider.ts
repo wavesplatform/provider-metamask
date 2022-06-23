@@ -13,20 +13,24 @@ import { TRANSACTION_TYPE } from '@waves/ts-types';
 import { base64Decode, base58Encode } from '@waves/ts-lib-crypto';
 
 import { IUser, IProviderMetamaskConfig, IOrderData } from './Provider.interface';
-import { EMetamaskError, IMMTypedData, IAbiOrderModel, MetamaskSign } from './Metamask.interface';
+import { EMetamaskError, IAbiOrderModel, MetamaskSign, IAbiSignTypedDataModel } from './Metamask.interface';
 import { DEFAULT_PROVIDER_CONFIG, DEFAULT_WAVES_CONFIG } from './config';
 import {
 	formatPayments,
-	findInvokeAbiByName,
 	getMetamaskNetworkConfig,
 	prepareAssetId,
 	serializeInvokeParams,
-	toMetamaskTypedData,
-	makeAbiOrderModel,
-	makeAbiSignMessageModel,
 	cloneObj,
 } from './utils';
-import { validateOrder, toMetamaskPriceMode } from './helpers';
+import {
+	findInvokeAbiByName,
+	toMetamaskPriceMode,
+	makeAbiOrderModel,
+	makeAbiSignMessageModel,
+	makeAbiSignTypedDataModel,
+	validateOrder,
+	validateTypedData,
+} from './helpers';
 import metamaskApi, { isMetaMaskInstalled } from './metamask'
 
 export class ProviderMetamask implements Provider {
@@ -98,31 +102,39 @@ export class ProviderMetamask implements Provider {
 			});
 	}
 
-	public async signTypedData(data: Array<TypedData>): Promise<MetamaskSign> {
-		this.__log('signTypedData :: ', data);
-
-		const typedData: IMMTypedData[] = data.map(toMetamaskTypedData);
-
-		this.__log('signTypedData :: metamaskApi.signTypedData ', typedData);
-		const sign = await metamaskApi.signTypedData(typedData);
-
-		this.__log('signTypedData :: result :: ', sign);
-		return sign;
-	}
-
 	public async signMessage(data: string): Promise<MetamaskSign> {
 		this.__log('signMessage :: ', data);
 		const chainId = this._config.wavesConfig.chainId;
 
-		const messageToSign = makeAbiSignMessageModel({
+		const abiSignMessage = makeAbiSignMessageModel({
 			chainId: chainId,
 		}, { text: data });
 
-		this.__log('signMessage :: metamaskApi.signMessage :: ', messageToSign);
-		const sign = await metamaskApi.signTypedDataV4(JSON.stringify(messageToSign));
-		this.__log('signMessage :: result :: ', sign);
+		this.__log('signMessage :: metamaskApi.signMessage :: ', abiSignMessage);
+		const result = await metamaskApi.signTypedDataV4(JSON.stringify(abiSignMessage));
+		this.__log('signMessage :: result :: ', result);
 
-		return sign;
+		return result;
+	}
+
+	public async signTypedData(data: TypedData[]): Promise<MetamaskSign> {
+		this.__log('signTypedData :: ', data);
+
+		const validate = validateTypedData(data);
+		if (validate.status === false) {
+			throw new Error(validate.message);
+		}
+
+		const chainId = this._config.wavesConfig.chainId;
+		const abiSignTypedData: IAbiSignTypedDataModel = makeAbiSignTypedDataModel({
+			chainId: chainId,
+		}, data);
+
+		this.__log('signTypedData :: metamaskApi.signTypedData ', abiSignTypedData);
+		const result = await metamaskApi.signTypedDataV4(JSON.stringify(abiSignTypedData));
+		this.__log('signTypedData :: result :: ', result);
+
+		return result;
 	}
 
 	public async signOrder(orderData: IOrderData): Promise<MetamaskSign> {
@@ -144,7 +156,7 @@ export class ProviderMetamask implements Provider {
 			order.orderType = String(order.orderType).toUpperCase();
 		}
 
-		const orderToSign: IAbiOrderModel = makeAbiOrderModel({
+		const abiOrderModel: IAbiOrderModel = makeAbiOrderModel({
 			chainId: chainId,
 		},{
 			"version": order.version,
@@ -161,9 +173,9 @@ export class ProviderMetamask implements Provider {
 			"priceMode": toMetamaskPriceMode(order.priceMode),
 		});
 
-		this.__log('signOrder :: metamaskApi.signOrder :: ', orderToSign);
-		const result = await metamaskApi.signOrder(orderToSign);
-		this.__log('signOrder :: result :: ',result);
+		this.__log('signOrder :: metamaskApi.signOrder :: ', abiOrderModel);
+		const result = await metamaskApi.signTypedDataV4(JSON.stringify(abiOrderModel));
+		this.__log('signOrder :: result :: ', result);
 
 		return result;
 	}

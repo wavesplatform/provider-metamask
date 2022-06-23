@@ -1,3 +1,4 @@
+import { TypedData } from '@waves/signer';
 import { ethers } from 'ethers';
 
 export type EthereumAddress = string;
@@ -81,6 +82,7 @@ interface IAbiCommon<KEY, TIMessage> {
 		EIP712Domain: IAbiInput[];
 		Order?: IAbiInput[]; // TODO typing
 		Message?: IAbiInput[]; // TODO typing
+		TypedData?: any; // TODO typing
 	};
 	primaryType: KEY;
 	domain: {
@@ -111,5 +113,8 @@ interface IAbiSignMessageMessage {
 	text: string;
 }
 
+type IAbiSignTypedData = any; // TODO typing
+
 export type IAbiOrderModel = IAbiCommon<'Order', IAbiOrderMessage>;
 export type IAbiSignMessageModel = IAbiCommon<'Message', IAbiSignMessageMessage>;
+export type IAbiSignTypedDataModel = IAbiCommon<'TypedData', IAbiSignTypedData>;

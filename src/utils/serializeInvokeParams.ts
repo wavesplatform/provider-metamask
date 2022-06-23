@@ -1,14 +1,14 @@
 import { InvokeScriptCallArgument, Long } from '@waves/ts-types';
 import { base58Decode, base64Decode } from '@waves/ts-lib-crypto';
+import { abiToInvokeArgType } from '../helpers';
 import { bytesToHexString } from './common';
 import {
 	IAbiInput,
 	EAbiInputTypes,
-	EInvokeArgType,
 	TupleCortege,
 } from '../Metamask.interface'
 
-const serializeBinary = (value: string): string => {
+export const serializeBinary = (value: string): string => {
 	if (value.indexOf('base64:') === 0) {
 		value = value.slice(6);
 
@@ -28,21 +28,6 @@ const abiInputDefaultValue = {
 	[EAbiInputTypes.INT_64]: 0,
 	[EAbiInputTypes.STRING]: '',
 };
-
-const abiToInvokeArgType = (abiType: EAbiInputTypes): EInvokeArgType => {
-	switch (abiType) {
-		case EAbiInputTypes.BOOL:
-			return EInvokeArgType.BOOLEAN;
-		case EAbiInputTypes.BYTES:
-			return EInvokeArgType.BINARY;
-		case EAbiInputTypes.INT_64:
-			return EInvokeArgType.INTEGER;
-		case EAbiInputTypes.STRING:
-			return EInvokeArgType.STRING;
-		default:
-			return EInvokeArgType.BOOLEAN;
-	}
-}
 
 // TODO work only for simple types
 const makeTupleItem = (abiInputs: IAbiInput[], param: InvokeScriptCallArgument<Long>): TupleCortege => {
