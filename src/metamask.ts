@@ -9,7 +9,6 @@ import {
 	EthereumAddress,
 	IAbi,
 	IContractMeta,
-	IMMTypedData,
 	MetamaskSign,
 	IAbiOrderModel,
 	IAbiSignTypedDataModel
@@ -229,15 +228,6 @@ const metamaskApi = {
 	},
 
 	signTypedData: async function(data: IAbiSignTypedDataModel): Promise<MetamaskSign> {
-		// const from = this._accounts[0];
-
-		// const sign: MetamaskSign = await ethereumApi.request({
-		// 	method: 'eth_signTypedData',
-		// 	params: [params, from],
-		// });
-
-		// return sign;
-
 		const from = this._accounts[0];
 
 		const sign = await ethereumApi.request({

@@ -66,27 +66,6 @@ export const makeAbiSignMessageModel = (
 	return abiSignMessageModel;
 };
 
-// const makeAbiForTypedData = (data: TypedData): IAbiInput[] => {
-// 	return [
-// 		{ "name": "type", "type": EAbiInputTypes.STRING },
-// 		{ "name": "key", "type": EAbiInputTypes.STRING },
-// 		// { "name": "value", "type": dataTypeToAbiType(data.type as EInvokeArgType) },
-// 		{ "name": "value", "type": EAbiInputTypes.STRING },
-// 	];
-// }
-
-// const prepareSignTypedData = (data: TypedData[]): TypedData[] => {
-// 	return data.map((dataItem) => {
-// 		dataItem = cloneObj(dataItem);
-
-// 		if (dataItem.type === EInvokeArgType.BINARY) {
-// 			dataItem.value = serializeBinary(dataItem.value as string);
-// 		}
-
-// 		return dataItem;
-// 	});
-// }
-
 const makeAbiForTypedData = (data: TypedData[]): IAbiInput[] => {
 	return data.map((item) => {
 		return {
