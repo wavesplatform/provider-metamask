@@ -120,16 +120,9 @@ export class ProviderMetamask implements Provider {
 	public async signTypedData(data: TypedData[]): Promise<MetamaskSign> {
 		this.__log('signTypedData :: ', data);
 
-
-		if (!data || data.length === 0) {
-			throw new Error('Empty typed data');
-		}
-
-		for (let i = 0; i < data.length; i++) {
-			const validate = validateTypedData(data[i]);
-			if (validate.status === false) {
-				throw new Error(validate.message);
-			}
+		const validate = validateTypedData(data);
+		if (validate.status === false) {
+			throw new Error(validate.message);
 		}
 
 		const chainId = this._config.wavesConfig.chainId;

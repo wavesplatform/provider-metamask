@@ -103,11 +103,6 @@ const makeAbiMessageForSignTypedData = (data: TypedData[]): any => {
 		let key = data[i].key;
 		let value = data[i].value;
 
-		// todo move to validator
-		if (message.hasOwnProperty(key)) {
-			throw `Duplicate key: ${key}`;
-		}
-
 		if (value === EInvokeArgType.BINARY) {
 			value = serializeBinary(data[i].value as string);
 		}

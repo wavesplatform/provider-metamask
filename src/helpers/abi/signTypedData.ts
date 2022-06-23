@@ -8,8 +8,7 @@ export const SIGN_TYPED_DATA_MODEL: IAbiSignTypedDataModel = {
 				"type": EAbiInputTypes.UINT_256
 			}
 		],
-		"TypedData": [
-		]
+		"TypedData": []
 	},
 	"domain": {
 		"chainId": 83,
