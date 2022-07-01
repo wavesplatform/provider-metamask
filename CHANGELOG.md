@@ -3,9 +3,9 @@
 provider-metamask changelog
 
 ## [1.1.1]
-	- Fix: Transfer custom asset amount [https://jira.wavesplatform.com/browse/LIBS-159]
-	- Update: Remove publicKey from login [https://jira.wavesplatform.com/browse/LIBS-163]
-	- Update: Switch network before sign tx [https://jira.wavesplatform.com/browse/LIBS-162]
+	- Fix: Transfer custom asset amount [LIBS-159](https://jira.wavesplatform.com/browse/LIBS-159)
+	- Update: Remove publicKey from login [LIBS-163](https://jira.wavesplatform.com/browse/LIBS-163)
+	- Update: Switch network before sign tx [LIBS-162](https://jira.wavesplatform.com/browse/LIBS-162)
 
 ## [1.1.0]
 	- Update: Use eth_signTypedData_v4 for sign typed data
