@@ -2,6 +2,11 @@
 
 provider-metamask changelog
 
+## [1.1.1]
+	- Fix: Transfer custom asset amount. [LIBS-159]
+	- Update: Remove publicKey from login. [LIBS-163]
+	- Update: Switch network before broadcast transaction. [LIBS-162]
+
 ## [1.1.0]
 	- Update: Use eth_signTypedData_v4 for sign typed data
 

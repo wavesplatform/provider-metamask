@@ -13,7 +13,7 @@ export interface IUserData {
 
 export interface IWavesConfig {
 	nodeUrl: string;
-	chainId: number;
+	chainId?: number; // deprecated
 }
 
 export interface IProviderMetamaskConfig {

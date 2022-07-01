@@ -38,17 +38,17 @@ const metamaskApi = {
 	// 	}
 	// },
 
-	getEncryptionPublicKey: async function(ethAddress) {
-		try {
-			const result = await ethereumApi.request({
-				method: 'eth_getEncryptionPublicKey',
-				params: [ethAddress],
-			});
-			return result;
-		} catch (err) {
-			throw err;
-		}
-	},
+	// getEncryptionPublicKey: async function(ethAddress) {
+	// 	try {
+	// 		const result = await ethereumApi.request({
+	// 			method: 'eth_getEncryptionPublicKey',
+	// 			params: [ethAddress],
+	// 		});
+	// 		return result;
+	// 	} catch (err) {
+	// 		throw err;
+	// 	}
+	// },
 
 	createContract: async function(wavesaddress: string, nodeUrl: string): Promise<IContractMeta> {
 		const ethersProvider = new ethers.providers.Web3Provider(ethereumApi, 'any');
@@ -184,28 +184,24 @@ const metamaskApi = {
 		return result;
 	},
 
-	async transferAsset(wavesAssetId: string, recipient: string, amount: string): Promise<any> {
+	async transferAsset(recipient: string, ethAssetId: string, amount: string): Promise<any> {
 		const from = this._accounts[0];
 
 		const ethersProvider = new ethers.providers.Web3Provider(ethereumApi, 'any');
-		const transferAbi = ABI_TRANSFER_CUSTOM_TOKEN;
 	
-		const bankFactory = new ethers.ContractFactory(
-			transferAbi,
-			BYTE_CODE,
+		const bankFactory = new ethers.Contract(
+			ethAssetId,
+			ABI_TRANSFER_CUSTOM_TOKEN,
 			ethersProvider.getSigner(),
 		);
 
-		const ethAssetId = wavesAssetId;
-		const contract = await bankFactory.attach(ethAssetId);
+		const contract = await bankFactory.attach(recipient);
 
 		const result = await contract.transfer(
 			recipient,
 			amount,
 			{
 			  from: from,
-			//   gasLimit: 10,
-			//   gasPrice: '100000',
 			}
 		);
 

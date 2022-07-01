@@ -10,7 +10,6 @@ import {
 } from '@waves/signer';
 import { ethAddress2waves, ethTxId2waves, wavesAddress2eth, wavesAsset2Eth } from '@waves/node-api-js';
 import { TRANSACTION_TYPE } from '@waves/ts-types';
-import { base64Decode, base58Encode } from '@waves/ts-lib-crypto';
 
 import { IUser, IProviderMetamaskConfig, IOrderData } from './Provider.interface';
 import { EMetamaskError, IAbiOrderModel, MetamaskSign, IAbiSignTypedDataModel } from './Metamask.interface';
@@ -21,6 +20,7 @@ import {
 	prepareAssetId,
 	serializeInvokeParams,
 	cloneObj,
+	promisify
 } from './utils';
 import {
 	findInvokeAbiByName,
@@ -35,18 +35,24 @@ import metamaskApi, { isMetaMaskInstalled } from './metamask'
 
 export class ProviderMetamask implements Provider {
 	public isSignAndBroadcastByProvider = true;
-
-	private _config: IProviderMetamaskConfig;
-
 	public user: IUser | null = null;
 
+	private _config: IProviderMetamaskConfig;
+	private _connectPromisify: ReturnType<typeof promisify>;
+
 	constructor(config?: IProviderMetamaskConfig) {
+		if (!isMetaMaskInstalled()) {
+			throw 'Metamask is not installed';
+		}
+
+		if (config?.wavesConfig?.chainId) {
+			console.warn('ProviderMetamask: config.chainId is deprecated');
+		}
+
 		this._config = config || DEFAULT_PROVIDER_CONFIG;
 		this._config.wavesConfig = { ...DEFAULT_WAVES_CONFIG, ...this._config.wavesConfig };
 
-		if(!isMetaMaskInstalled()) {
-			throw 'Metamask is not installed';
-		}
+		this._connectPromisify = promisify();
 
 		this.__log('constructor', this._config);
 	}
@@ -62,22 +68,22 @@ export class ProviderMetamask implements Provider {
 		if(users?.length) {
 			const ethAddr: string = users[0];
 
-			// base64 > base58
-			const publicKey = await metamaskApi.getEncryptionPublicKey(ethAddr);
-			const bytesFromBase64 = base64Decode(publicKey);
-			const base58String = base58Encode(bytesFromBase64);
+			// base64 > base58 // removed https://jira.wavesplatform.com/browse/LIBS-163
+			// const publicKey = await metamaskApi.getEncryptionPublicKey(ethAddr);
+			// const bytesFromBase64 = base64Decode(publicKey);
+			// const base58String = base58Encode(bytesFromBase64);
 
 			this.user = {
 				id: 0,
 				path: '',
-				publicKey: base58String,
-				address: ethAddress2waves(ethAddr, this._config.wavesConfig.chainId), //todo check to get from MM
+				publicKey: '',
+				address: ethAddress2waves(ethAddr, this._config.wavesConfig.chainId!), //todo check to get from MM
 				statusCode: ''
 			};
 
 			this.__log('login :: ', this.user);
 
-			return this.user
+			return this.user;
 		} else {
 			throw 'Can not get user from metamask';
 		}
@@ -92,6 +98,9 @@ export class ProviderMetamask implements Provider {
 	public async sign(list: Array<SignerTx>): Promise<Array<any>> {
 		this.__log('sign');
 
+		await this._connectPromisify.promise;
+		await this.trySwitchNetwork();
+
 		return Promise.all(list.map(this.signOneTx, this))
 			.then((txList) => {
 				if(txList.length === 1) {
@@ -104,7 +113,11 @@ export class ProviderMetamask implements Provider {
 
 	public async signMessage(data: string): Promise<MetamaskSign> {
 		this.__log('signMessage :: ', data);
-		const chainId = this._config.wavesConfig.chainId;
+
+		await this._connectPromisify.promise;
+		await this.trySwitchNetwork();
+
+		const chainId = this._config.wavesConfig.chainId!;
 
 		const abiSignMessage = makeAbiSignMessageModel({
 			chainId: chainId,
@@ -120,12 +133,15 @@ export class ProviderMetamask implements Provider {
 	public async signTypedData(data: TypedData[]): Promise<MetamaskSign> {
 		this.__log('signTypedData :: ', data);
 
+		await this._connectPromisify.promise;
+		await this.trySwitchNetwork();
+
 		const validate = validateTypedData(data);
 		if (validate.status === false) {
 			throw new Error(validate.message);
 		}
 
-		const chainId = this._config.wavesConfig.chainId;
+		const chainId = this._config.wavesConfig.chainId!;
 		const abiSignTypedData: IAbiSignTypedDataModel = makeAbiSignTypedDataModel({
 			chainId: chainId,
 		}, data);
@@ -139,9 +155,12 @@ export class ProviderMetamask implements Provider {
 
 	public async signOrder(orderData: IOrderData): Promise<MetamaskSign> {
 		this.__log('signOrder :: ', orderData);
-		
+
+		await this._connectPromisify.promise;
+		await this.trySwitchNetwork();
+
 		const order = cloneObj(orderData);
-		const chainId = this._config.wavesConfig.chainId;
+		const chainId = this._config.wavesConfig.chainId!;
 
 		order.matcherFeeAssetId = prepareAssetId(order.matcherFeeAssetId);
 		order.assetPair.amountAsset = prepareAssetId(order.assetPair.amountAsset);
@@ -182,39 +201,15 @@ export class ProviderMetamask implements Provider {
 
 	public async connect(options: ConnectOptions): Promise<void> {
 		this.__log('connect', options);
-	}
 
-	public on<EVENT extends keyof AuthEvents>(
-		event: EVENT,
-		handler: Handler<AuthEvents[EVENT]>,
-	): Provider {
-		this.__log('on');
-		console.error('Not implemented');
-		return this;
-	}
-
-	public once<EVENT extends keyof AuthEvents>(
-		event: EVENT,
-		handler: Handler<AuthEvents[EVENT]>,
-	): Provider{
-		this.__log('once');
-		console.error('Not implemented');
-		return this;
-	};
-
-	public off<EVENT extends keyof AuthEvents>(
-		event: EVENT,
-		handler: Handler<AuthEvents[EVENT]>,
-	): Provider {
-		this.__log('off');
-		console.error('Not implemented');
-		return this;
+		this._config.wavesConfig.chainId = options.NETWORK_BYTE;
+		this._connectPromisify.resolve();
 	}
 
 	private async trySwitchNetwork() {
 		this.__log('trySwitchNetwork');
 
-		const networkConfig = getMetamaskNetworkConfig(this._config.wavesConfig.chainId);
+		const networkConfig = getMetamaskNetworkConfig(this._config.wavesConfig.chainId!);
 
 		if(networkConfig == null) {
 			this.__log('trySwitchNetwork :: skiped');
@@ -256,9 +251,10 @@ export class ProviderMetamask implements Provider {
 					String(tx.amount)
 				);
 			} else {
+				console.log(tx.assetId, tx.recipient, wavesAsset2Eth(tx.assetId), wavesAddress2eth(tx.recipient));
 				const txInfo = await metamaskApi.transferAsset(
-					wavesAsset2Eth(tx.assetId),
 					wavesAddress2eth(tx.recipient),
+					wavesAsset2Eth(tx.assetId),
 					String(tx.amount)
 				);
 
@@ -299,6 +295,33 @@ export class ProviderMetamask implements Provider {
 			this.__log('signOneTx :: result :: ', result);
 			return result;
 		}
+	}
+
+	public on<EVENT extends keyof AuthEvents>(
+		event: EVENT,
+		handler: Handler<AuthEvents[EVENT]>,
+	): Provider {
+		this.__log('on');
+		console.error('Not implemented');
+		return this;
+	}
+
+	public once<EVENT extends keyof AuthEvents>(
+		event: EVENT,
+		handler: Handler<AuthEvents[EVENT]>,
+	): Provider{
+		this.__log('once');
+		console.error('Not implemented');
+		return this;
+	};
+
+	public off<EVENT extends keyof AuthEvents>(
+		event: EVENT,
+		handler: Handler<AuthEvents[EVENT]>,
+	): Provider {
+		this.__log('off');
+		console.error('Not implemented');
+		return this;
 	}
 
 	private __log(tag: string, ...args) {
