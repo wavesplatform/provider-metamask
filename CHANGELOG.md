@@ -2,9 +2,10 @@
 
 provider-metamask changelog
 
-## [1.1.2]
+## [1.1.3]
 	- Fix: Adding network for new account [GT-531]
 	- Fix: Return waves signature type of sign for tx type 4 (transfer) [GT-531]
+	- Core: Add network before trying to switch
 
 ## [1.1.1]
 	- Fix: Transfer custom asset amount. [LIBS-159]
