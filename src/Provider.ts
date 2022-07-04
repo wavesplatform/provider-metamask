@@ -81,7 +81,7 @@ export class ProviderMetamask implements Provider {
 				statusCode: ''
 			};
 
-			this.__log('login :: ', this.user);
+			this.__log('login :', this.user);
 
 			return this.user;
 		} else {
@@ -112,7 +112,7 @@ export class ProviderMetamask implements Provider {
 	}
 
 	public async signMessage(data: string): Promise<MetamaskSign> {
-		this.__log('signMessage :: ', data);
+		this.__log('signMessage :', data);
 
 		await this._connectPromisify.promise;
 		await this.trySwitchNetwork();
@@ -123,15 +123,15 @@ export class ProviderMetamask implements Provider {
 			chainId: chainId,
 		}, { text: data });
 
-		this.__log('signMessage :: metamaskApi.signMessage :: ', abiSignMessage);
+		this.__log('signMessage :: metamaskApi.signMessage :', abiSignMessage);
 		const result = await metamaskApi.signTypedDataV4(JSON.stringify(abiSignMessage));
-		this.__log('signMessage :: result :: ', result);
+		this.__log('signMessage :: metamaskApi.signMessage :: result :', result);
 
 		return result;
 	}
 
 	public async signTypedData(data: TypedData[]): Promise<MetamaskSign> {
-		this.__log('signTypedData :: ', data);
+		this.__log('signTypedData :', data);
 
 		await this._connectPromisify.promise;
 		await this.trySwitchNetwork();
@@ -146,15 +146,15 @@ export class ProviderMetamask implements Provider {
 			chainId: chainId,
 		}, data);
 
-		this.__log('signTypedData :: metamaskApi.signTypedData ', abiSignTypedData);
+		this.__log('signTypedData :: metamaskApi.signTypedData :', abiSignTypedData);
 		const result = await metamaskApi.signTypedDataV4(JSON.stringify(abiSignTypedData));
-		this.__log('signTypedData :: result :: ', result);
+		this.__log('signTypedData :: metamaskApi.signTypedData :: result :', result);
 
 		return result;
 	}
 
 	public async signOrder(orderData: IOrderData): Promise<MetamaskSign> {
-		this.__log('signOrder :: ', orderData);
+		this.__log('signOrder :', orderData);
 
 		await this._connectPromisify.promise;
 		await this.trySwitchNetwork();
@@ -192,9 +192,9 @@ export class ProviderMetamask implements Provider {
 			"priceMode": toMetamaskPriceMode(order.priceMode),
 		});
 
-		this.__log('signOrder :: metamaskApi.signOrder :: ', abiOrderModel);
+		this.__log('signOrder :: metamaskApi.signOrder :', abiOrderModel);
 		const result = await metamaskApi.signTypedDataV4(JSON.stringify(abiOrderModel));
-		this.__log('signOrder :: result :: ', result);
+		this.__log('signOrder :: metamaskApi.signOrder :: result :', result);
 
 		return result;
 	}
@@ -218,19 +218,19 @@ export class ProviderMetamask implements Provider {
 
 		// try to switch on waves network or create it
 		try {
-			this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain', networkConfig);
+			this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain :', networkConfig);
 			await metamaskApi.switchEthereumChain(networkConfig);
-		} catch (err) {
-			switch (err.code) {
+		} catch (error) {
+			switch (error.code) {
 				case EMetamaskError.CHAIN_NOT_ADDED:
-					this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain', networkConfig);
+					this.__log('trySwitchNetwork :: metamaskApi.addEthereumChain :', networkConfig);
 					await metamaskApi.addEthereumChain(networkConfig);
 					return;
 				case EMetamaskError.REJECT_REQUEST:
 					throw 'Switch to waves network is rejected';
+				default:
+					throw error;
 			}
-
-			throw err;
 		}
 	}
 
@@ -244,29 +244,31 @@ export class ProviderMetamask implements Provider {
 				tx.assetId = null;
 			}
 
-			this.__log('signOneTx :: transfer ', tx);
+			this.__log('signOneTx :: transfer :', tx);
 			if (tx.assetId === null) {
+				this.__log('signOneTx :: transfer waves');
 				sign = await metamaskApi.transferWaves(
 					wavesAddress2eth(tx.recipient),
 					String(tx.amount)
 				);
+				this.__log('signOneTx :: transfer waves :: result :', sign);
 			} else {
-				console.log(tx.assetId, tx.recipient, wavesAsset2Eth(tx.assetId), wavesAddress2eth(tx.recipient));
+				this.__log('signOneTx :: transfer asset');
 				const txInfo = await metamaskApi.transferAsset(
 					wavesAddress2eth(tx.recipient),
 					wavesAsset2Eth(tx.assetId),
 					String(tx.amount)
 				);
-
-				sign = txInfo.hash.slice(2);
+				this.__log('signOneTx :: transfer asset :: result :', txInfo);
+				sign = txInfo.hash;
 			}
 
 			const result = {
 				...tx,
-				id: sign
+				id: ethTxId2waves(sign.slice(2))
 			};
 
-			this.__log('signOneTx :: result :: ', result);
+			this.__log('signOneTx :: result :', result);
 			return result;
 
 		} else if (tx.type == TRANSACTION_TYPE.INVOKE_SCRIPT) {
@@ -281,18 +283,20 @@ export class ProviderMetamask implements Provider {
 			const paramsValues = serializeInvokeParams(call.args, abi!.inputs);
 			const payments = formatPayments(txInvoke.payment || []);
 
-			this.__log('signOneTx :: invoke ', tx, fnName, paramsValues, payments);
+			this.__log('signOneTx :: invoke', tx, fnName, paramsValues, payments);
 			const txInfo = await contract.contract[fnName](
 				...paramsValues,
 				payments
 			);
+			this.__log('signOneTx :: invoke result :', tx, fnName, paramsValues, payments);
+			const sign = txInfo.hash;
 
 			const result = {
 				...tx,
-				id: ethTxId2waves(txInfo.hash.slice(2))
+				id: ethTxId2waves(sign.slice(2))
 			};
 
-			this.__log('signOneTx :: result :: ', result);
+			this.__log('signOneTx :: result :', result);
 			return result;
 		}
 	}
@@ -326,7 +330,7 @@ export class ProviderMetamask implements Provider {
 
 	private __log(tag: string, ...args) {
 		if (this._config.debug) {
-			console.log(`ProviderMetamask :: ${tag} : `, ...args);
+			console.log(`ProviderMetamask :: ${tag} :`, ...args);
 		}
 	}
 

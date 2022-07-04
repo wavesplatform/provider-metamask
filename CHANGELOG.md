@@ -2,6 +2,10 @@
 
 provider-metamask changelog
 
+## [1.1.2]
+	- Fix: Adding network for new account [GT-531]
+	- Fix: Return waves signature type of sign for tx type 4 (transfer) [GT-531]
+
 ## [1.1.1]
 	- Fix: Transfer custom asset amount. [LIBS-159]
 	- Update: Remove publicKey from login. [LIBS-163]
