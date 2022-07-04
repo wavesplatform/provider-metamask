@@ -216,21 +216,24 @@ export class ProviderMetamask implements Provider {
 			return;
 		}
 
-		// try to switch on waves network or create it
+		await metamaskApi.addEthereumChain(networkConfig);
+
 		try {
-			this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain :', networkConfig);
+			this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain', networkConfig);
 			await metamaskApi.switchEthereumChain(networkConfig);
 		} catch (error) {
-			switch (error.code) {
-				case EMetamaskError.CHAIN_NOT_ADDED:
-					this.__log('trySwitchNetwork :: metamaskApi.addEthereumChain :', networkConfig);
-					await metamaskApi.addEthereumChain(networkConfig);
-					return;
-				case EMetamaskError.REJECT_REQUEST:
-					throw 'Switch to waves network is rejected';
-				default:
-					throw error;
-			}
+			throw error;
+			// this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain :: error', error);
+			// switch (error.code) {
+			// 	case EMetamaskError.CHAIN_NOT_ADDED:
+			// 		this.__log('trySwitchNetwork :: metamaskApi.addEthereumChain', networkConfig);
+			// 		await metamaskApi.addEthereumChain(networkConfig);
+			// 		return;
+			// 	case EMetamaskError.REJECT_REQUEST:
+			// 		throw 'Switch to waves network is rejected';
+			// 	default:
+			// 		throw error;
+			// }
 		}
 	}
 
