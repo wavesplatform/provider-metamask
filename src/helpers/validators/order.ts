@@ -18,7 +18,7 @@ export const validateOrder = (order): IValidationResult => {
 	}
 
 	const orderType = String(order.orderType).toUpperCase();
-	if (!SUPPORTED_ORDER_TYPE.includes(orderType)) {
+	if (!order.orderType || !SUPPORTED_ORDER_TYPE.includes(orderType)) {
 		return {
 			status: false,
 			message: `Invalid field orderType: "${String(order.orderType)}"\nSupports: ${SUPPORTED_ORDER_TYPE.join(' | ')}`,

@@ -1,4 +1,3 @@
-// import MetaMaskOnboarding from '@metamask/onboarding';
 import {
 	AuthEvents,
 	ConnectOptions,
@@ -11,8 +10,8 @@ import {
 import { ethAddress2waves, ethTxId2waves, wavesAddress2eth, wavesAsset2Eth } from '@waves/node-api-js';
 import { TRANSACTION_TYPE } from '@waves/ts-types';
 
-import { IUser, IProviderMetamaskConfig, IOrderData } from './Provider.interface';
-import { EMetamaskError, IAbiOrderModel, MetamaskSign, IAbiSignTypedDataModel } from './Metamask.interface';
+import { IUser, IProviderMetamaskConfig, IOrderData, EPriceMode } from './Provider.interface';
+import { IAbiOrderModel, MetamaskSign, IAbiSignTypedDataModel } from './Metamask.interface';
 import { DEFAULT_PROVIDER_CONFIG, DEFAULT_WAVES_CONFIG } from './config';
 import {
 	formatPayments,
@@ -31,7 +30,7 @@ import {
 	validateOrder,
 	validateTypedData,
 } from './helpers';
-import metamaskApi, { isMetaMaskInstalled } from './metamask'
+import metamaskApi, { isMetaMaskInstalled } from './metamask';
 
 export class ProviderMetamask implements Provider {
 	public isSignAndBroadcastByProvider = true;
@@ -46,7 +45,7 @@ export class ProviderMetamask implements Provider {
 		}
 
 		if (config?.wavesConfig?.chainId) {
-			console.warn('ProviderMetamask: config.chainId is deprecated');
+			console.warn('ProviderMetamask: config.chainId is deprecated and will be removed. Just omit it.');
 		}
 
 		this._config = config || DEFAULT_PROVIDER_CONFIG;
@@ -171,15 +170,11 @@ export class ProviderMetamask implements Provider {
 			throw new Error(validate.message);
 		}
 
-		if (order.orderType) {
-			order.orderType = String(order.orderType).toUpperCase();
-		}
-
 		const abiOrderModel: IAbiOrderModel = makeAbiOrderModel({
 			chainId: chainId,
 		},{
 			"version": order.version,
-			"orderType": order.orderType,
+			"orderType": order.orderType.toUpperCase() as ('BUY' | 'SELL'),
 			"matcherPublicKey": order.matcherPublicKey,
 			"matcherFeeAssetId": order.matcherFeeAssetId,
 			"amountAsset": order.assetPair.amountAsset,
@@ -189,7 +184,7 @@ export class ProviderMetamask implements Provider {
 			"price": order.price,
 			"timestamp": order.timestamp,
 			"expiration": order.expiration,
-			"priceMode": toMetamaskPriceMode(order.priceMode),
+			"priceMode": toMetamaskPriceMode(order.priceMode as EPriceMode),
 		});
 
 		this.__log('signOrder :: metamaskApi.signOrder :', abiOrderModel);
