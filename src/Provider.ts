@@ -37,6 +37,7 @@ export class ProviderMetamask implements Provider {
 	public user: IUser | null = null;
 
 	private _config: IProviderMetamaskConfig;
+	private _connectOptions: ConnectOptions | null;
 	private _connectPromisify: ReturnType<typeof promisify>;
 
 	constructor(config?: IProviderMetamaskConfig) {
@@ -44,12 +45,20 @@ export class ProviderMetamask implements Provider {
 			throw 'Metamask is not installed';
 		}
 
+		if (config?.wavesConfig) {
+			console.warn('ProviderMetamask: config.wavesConfig is deprecated and will be removed. Just omit it.');
+		}
+
 		if (config?.wavesConfig?.chainId) {
-			console.warn('ProviderMetamask: config.chainId is deprecated and will be removed. Just omit it.');
+			console.warn('ProviderMetamask: config.wavesConfig.chainId is deprecated and will be removed. Just omit it.');
+		}
+
+		if (config?.wavesConfig?.nodeUrl) {
+			console.warn('ProviderMetamask: config.wavesConfig.nodeUrl is deprecated and will be removed. Just omit it.');
 		}
 
 		this._config = config || DEFAULT_PROVIDER_CONFIG;
-		this._config.wavesConfig = { ...DEFAULT_WAVES_CONFIG, ...this._config.wavesConfig };
+		this._connectOptions = null;
 
 		this._connectPromisify = promisify();
 
@@ -59,6 +68,7 @@ export class ProviderMetamask implements Provider {
 	public async login(): Promise<UserData> {
 		this.__log('login');
 
+		await this._connectPromisify.promise;
 		await this.trySwitchNetwork();
 
 		const users = await metamaskApi.requestAccounts();
@@ -76,7 +86,7 @@ export class ProviderMetamask implements Provider {
 				id: 0,
 				path: '',
 				publicKey: '',
-				address: ethAddress2waves(ethAddr, this._config.wavesConfig.chainId!), //todo check to get from MM
+				address: ethAddress2waves(ethAddr, this._connectOptions!.NETWORK_BYTE),
 				statusCode: ''
 			};
 
@@ -116,7 +126,7 @@ export class ProviderMetamask implements Provider {
 		await this._connectPromisify.promise;
 		await this.trySwitchNetwork();
 
-		const chainId = this._config.wavesConfig.chainId!;
+		const chainId = this._connectOptions!.NETWORK_BYTE;
 
 		const abiSignMessage = makeAbiSignMessageModel({
 			chainId: chainId,
@@ -140,9 +150,9 @@ export class ProviderMetamask implements Provider {
 			throw new Error(validate.message);
 		}
 
-		const chainId = this._config.wavesConfig.chainId!;
+		const chainId = this._connectOptions!.NETWORK_BYTE;
 		const abiSignTypedData: IAbiSignTypedDataModel = makeAbiSignTypedDataModel({
-			chainId: chainId,
+			chainId,
 		}, data);
 
 		this.__log('signTypedData :: metamaskApi.signTypedData :', abiSignTypedData);
@@ -159,7 +169,7 @@ export class ProviderMetamask implements Provider {
 		await this.trySwitchNetwork();
 
 		const order = cloneObj(orderData);
-		const chainId = this._config.wavesConfig.chainId!;
+		const chainId = this._connectOptions!.NETWORK_BYTE;
 
 		order.matcherFeeAssetId = prepareAssetId(order.matcherFeeAssetId);
 		order.assetPair.amountAsset = prepareAssetId(order.assetPair.amountAsset);
@@ -197,14 +207,15 @@ export class ProviderMetamask implements Provider {
 	public async connect(options: ConnectOptions): Promise<void> {
 		this.__log('connect', options);
 
-		this._config.wavesConfig.chainId = options.NETWORK_BYTE;
+		this._connectOptions = { ...options };
+
 		this._connectPromisify.resolve();
 	}
 
 	private async trySwitchNetwork() {
 		this.__log('trySwitchNetwork');
 
-		const networkConfig = getMetamaskNetworkConfig(this._config.wavesConfig.chainId!);
+		const networkConfig = getMetamaskNetworkConfig(this._connectOptions!.NETWORK_BYTE);
 
 		if(networkConfig == null) {
 			this.__log('trySwitchNetwork :: skiped');
@@ -233,8 +244,6 @@ export class ProviderMetamask implements Provider {
 	}
 
 	private async signOneTx(tx: SignerTx): Promise<any> {
-		const wavesConfig = this._config.wavesConfig;
-
 		if(tx.type == TRANSACTION_TYPE.TRANSFER) {
 			let sign;
 
@@ -275,7 +284,7 @@ export class ProviderMetamask implements Provider {
 			const fnName = call.function;
 			const dappAddress = txInvoke.dApp;
 
-			const contract = await metamaskApi.createContract(dappAddress, wavesConfig.nodeUrl);
+			const contract = await metamaskApi.createContract(dappAddress, this._connectOptions!.NODE_URL);
 
 			const abi = findInvokeAbiByName(contract.abi, fnName);
 			const paramsValues = serializeInvokeParams(call.args, abi!.inputs);

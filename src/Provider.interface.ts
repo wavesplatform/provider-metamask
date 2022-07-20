@@ -12,13 +12,13 @@ export interface IUserData {
 }
 
 export interface IWavesConfig {
-	nodeUrl: string;
+	nodeUrl?: string;
 	chainId?: number; // deprecated
 }
 
 export interface IProviderMetamaskConfig {
 	debug?: boolean;
-	wavesConfig: IWavesConfig;
+	wavesConfig?: IWavesConfig;
 }
 
 export enum EPriceMode {
