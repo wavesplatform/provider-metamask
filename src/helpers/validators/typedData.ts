@@ -17,7 +17,7 @@ export const validateTypedData = (data?: TypedData[] | null): IValidationResult 
 	}
 
 	const keys = data.map((item: TypedData) => item.key);
-	const duplicates = keys.filter((element, index) =>  keys.indexOf(element) !== index );
+	const duplicates = keys.filter((element, index) => keys.indexOf(element) !== index );
 	if (duplicates.length) {
 		return {
 			status: false,

@@ -1,4 +1,3 @@
-// import MetaMaskOnboarding from '@metamask/onboarding';
 import {
 	AuthEvents,
 	ConnectOptions,
@@ -11,8 +10,8 @@ import {
 import { ethAddress2waves, ethTxId2waves, wavesAddress2eth, wavesAsset2Eth } from '@waves/node-api-js';
 import { TRANSACTION_TYPE } from '@waves/ts-types';
 
-import { IUser, IProviderMetamaskConfig, IOrderData } from './Provider.interface';
-import { EMetamaskError, IAbiOrderModel, MetamaskSign, IAbiSignTypedDataModel } from './Metamask.interface';
+import { IUser, IProviderMetamaskConfig, IOrderData, EPriceMode } from './Provider.interface';
+import { IAbiOrderModel, MetamaskSign, IAbiSignTypedDataModel } from './Metamask.interface';
 import { DEFAULT_PROVIDER_CONFIG, DEFAULT_WAVES_CONFIG } from './config';
 import {
 	formatPayments,
@@ -31,13 +30,14 @@ import {
 	validateOrder,
 	validateTypedData,
 } from './helpers';
-import metamaskApi, { isMetaMaskInstalled } from './metamask'
+import metamaskApi, { isMetaMaskInstalled } from './metamask';
 
 export class ProviderMetamask implements Provider {
 	public isSignAndBroadcastByProvider = true;
 	public user: IUser | null = null;
 
 	private _config: IProviderMetamaskConfig;
+	private _connectOptions: ConnectOptions | null;
 	private _connectPromisify: ReturnType<typeof promisify>;
 
 	constructor(config?: IProviderMetamaskConfig) {
@@ -45,12 +45,20 @@ export class ProviderMetamask implements Provider {
 			throw 'Metamask is not installed';
 		}
 
+		if (config?.wavesConfig) {
+			console.warn('ProviderMetamask: config.wavesConfig is deprecated and will be removed. Just omit it.');
+		}
+
 		if (config?.wavesConfig?.chainId) {
-			console.warn('ProviderMetamask: config.chainId is deprecated');
+			console.warn('ProviderMetamask: config.wavesConfig.chainId is deprecated and will be removed. Just omit it.');
+		}
+
+		if (config?.wavesConfig?.nodeUrl) {
+			console.warn('ProviderMetamask: config.wavesConfig.nodeUrl is deprecated and will be removed. Just omit it.');
 		}
 
 		this._config = config || DEFAULT_PROVIDER_CONFIG;
-		this._config.wavesConfig = { ...DEFAULT_WAVES_CONFIG, ...this._config.wavesConfig };
+		this._connectOptions = null;
 
 		this._connectPromisify = promisify();
 
@@ -60,6 +68,7 @@ export class ProviderMetamask implements Provider {
 	public async login(): Promise<UserData> {
 		this.__log('login');
 
+		await this._connectPromisify.promise;
 		await this.trySwitchNetwork();
 
 		const users = await metamaskApi.requestAccounts();
@@ -77,7 +86,7 @@ export class ProviderMetamask implements Provider {
 				id: 0,
 				path: '',
 				publicKey: '',
-				address: ethAddress2waves(ethAddr, this._config.wavesConfig.chainId!), //todo check to get from MM
+				address: ethAddress2waves(ethAddr, this._connectOptions!.NETWORK_BYTE),
 				statusCode: ''
 			};
 
@@ -117,7 +126,7 @@ export class ProviderMetamask implements Provider {
 		await this._connectPromisify.promise;
 		await this.trySwitchNetwork();
 
-		const chainId = this._config.wavesConfig.chainId!;
+		const chainId = this._connectOptions!.NETWORK_BYTE;
 
 		const abiSignMessage = makeAbiSignMessageModel({
 			chainId: chainId,
@@ -141,9 +150,9 @@ export class ProviderMetamask implements Provider {
 			throw new Error(validate.message);
 		}
 
-		const chainId = this._config.wavesConfig.chainId!;
+		const chainId = this._connectOptions!.NETWORK_BYTE;
 		const abiSignTypedData: IAbiSignTypedDataModel = makeAbiSignTypedDataModel({
-			chainId: chainId,
+			chainId,
 		}, data);
 
 		this.__log('signTypedData :: metamaskApi.signTypedData :', abiSignTypedData);
@@ -160,7 +169,7 @@ export class ProviderMetamask implements Provider {
 		await this.trySwitchNetwork();
 
 		const order = cloneObj(orderData);
-		const chainId = this._config.wavesConfig.chainId!;
+		const chainId = this._connectOptions!.NETWORK_BYTE;
 
 		order.matcherFeeAssetId = prepareAssetId(order.matcherFeeAssetId);
 		order.assetPair.amountAsset = prepareAssetId(order.assetPair.amountAsset);
@@ -171,15 +180,11 @@ export class ProviderMetamask implements Provider {
 			throw new Error(validate.message);
 		}
 
-		if (order.orderType) {
-			order.orderType = String(order.orderType).toUpperCase();
-		}
-
 		const abiOrderModel: IAbiOrderModel = makeAbiOrderModel({
 			chainId: chainId,
 		},{
 			"version": order.version,
-			"orderType": order.orderType,
+			"orderType": order.orderType.toUpperCase() as ('BUY' | 'SELL'),
 			"matcherPublicKey": order.matcherPublicKey,
 			"matcherFeeAssetId": order.matcherFeeAssetId,
 			"amountAsset": order.assetPair.amountAsset,
@@ -189,7 +194,7 @@ export class ProviderMetamask implements Provider {
 			"price": order.price,
 			"timestamp": order.timestamp,
 			"expiration": order.expiration,
-			"priceMode": toMetamaskPriceMode(order.priceMode),
+			"priceMode": toMetamaskPriceMode(order.priceMode as EPriceMode),
 		});
 
 		this.__log('signOrder :: metamaskApi.signOrder :', abiOrderModel);
@@ -202,14 +207,15 @@ export class ProviderMetamask implements Provider {
 	public async connect(options: ConnectOptions): Promise<void> {
 		this.__log('connect', options);
 
-		this._config.wavesConfig.chainId = options.NETWORK_BYTE;
+		this._connectOptions = { ...options };
+
 		this._connectPromisify.resolve();
 	}
 
 	private async trySwitchNetwork() {
 		this.__log('trySwitchNetwork');
 
-		const networkConfig = getMetamaskNetworkConfig(this._config.wavesConfig.chainId!);
+		const networkConfig = getMetamaskNetworkConfig(this._connectOptions!.NETWORK_BYTE);
 
 		if(networkConfig == null) {
 			this.__log('trySwitchNetwork :: skiped');
@@ -238,8 +244,6 @@ export class ProviderMetamask implements Provider {
 	}
 
 	private async signOneTx(tx: SignerTx): Promise<any> {
-		const wavesConfig = this._config.wavesConfig;
-
 		if(tx.type == TRANSACTION_TYPE.TRANSFER) {
 			let sign;
 
@@ -280,7 +284,7 @@ export class ProviderMetamask implements Provider {
 			const fnName = call.function;
 			const dappAddress = txInvoke.dApp;
 
-			const contract = await metamaskApi.createContract(dappAddress, wavesConfig.nodeUrl);
+			const contract = await metamaskApi.createContract(dappAddress, this._connectOptions!.NODE_URL);
 
 			const abi = findInvokeAbiByName(contract.abi, fnName);
 			const paramsValues = serializeInvokeParams(call.args, abi!.inputs);

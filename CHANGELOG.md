@@ -2,6 +2,12 @@
 
 provider-metamask changelog
 
+## [1.1.4]
+	- Update: Use ethers.ContractFactory for transfer custom asset (reverted)
+	- Core: Use metamaskDetectProvider from @metamask/detect-provider
+	- Core: IOrderData interface added
+	- Core: config.wavesConfig deprecated
+
 ## [1.1.3]
 	- Fix: Adding network for new account [GT-531]
 	- Fix: Return waves signature type of sign for tx type 4 (transfer) [GT-531]

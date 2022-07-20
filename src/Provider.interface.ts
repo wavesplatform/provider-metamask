@@ -12,13 +12,13 @@ export interface IUserData {
 }
 
 export interface IWavesConfig {
-	nodeUrl: string;
+	nodeUrl?: string;
 	chainId?: number; // deprecated
 }
 
 export interface IProviderMetamaskConfig {
 	debug?: boolean;
-	wavesConfig: IWavesConfig;
+	wavesConfig?: IWavesConfig;
 }
 
 export enum EPriceMode {
@@ -26,4 +26,19 @@ export enum EPriceMode {
 	FIXED_DECIMALS = 'fixedDecimals',
 }
 
-export type IOrderData = any;
+export interface IOrderData {
+	version: number;
+	orderType: 'buy' | 'sell';
+	matcherPublicKey: string,
+	matcherFeeAssetId: string,
+	assetPair: {
+		amountAsset: string;
+		priceAsset: string;
+	};
+	matcherFee: number;
+	amount: number;
+	price: number;
+	timestamp: number;
+	expiration: number;
+	priceMode: 'assetDecimals' | 'fixedDecimals';
+};

@@ -1,7 +1,6 @@
 import { ethers } from 'ethers';
-
 import MetaMaskOnboarding from '@metamask/onboarding';
-// import metamaskDetectProvider from '@metamask/detect-provider';
+import metamaskDetectProvider from '@metamask/detect-provider';
 import { wavesAddress2eth } from '@waves/node-api-js';
 
 import {
@@ -19,47 +18,92 @@ import { toEthereumAmount } from './utils';
 
 const BYTE_CODE = '0x';
 
-// @ts-ignore
-const ethereumApi = window['ethereum'];
-
 const metamaskApi = {
 
 	_accounts: [],
+	_api: undefined, // todo api type
 
-	// detectEthereumProvider: async (): Promise<boolean> => {
-	// 	const provider = await metamaskDetectProvider();
+	api: async function(): Promise<any> {
+		if (!this._api) {
+			this._api = (await metamaskDetectProvider()) as any;
+		}
 
-	// 	if (provider) {
-	// 	  // From now on, this should always be true:
-	// 	  // provider === window.ethereum
-	// 	  return true;
-	// 	} else {
-	// 	  return false;
-	// 	}
-	// },
+		return this._api;
+	},
 
-	// getEncryptionPublicKey: async function(ethAddress) {
-	// 	try {
-	// 		const result = await ethereumApi.request({
-	// 			method: 'eth_getEncryptionPublicKey',
-	// 			params: [ethAddress],
-	// 		});
-	// 		return result;
-	// 	} catch (err) {
-	// 		throw err;
-	// 	}
-	// },
+	requestAccounts: async function(): Promise<string[]> {
+		const ethereumApi = await this.api();
+
+		try {
+			const newAccounts = await ethereumApi.request({
+				method: 'eth_requestAccounts',
+			});
+
+			this._accounts = newAccounts;
+
+			return this._accounts;
+			// onRequest(newAccounts);
+		} catch (error) {
+			console.error(error);
+			throw 'Error requestAccounts';
+		}
+	},
+
+	//
+	getAccounts: async function(): Promise<EthereumAddress[]> {
+		const ethereumApi = await this.api();
+
+		try {
+			const newAccounts = await ethereumApi.request({
+				method: 'eth_accounts',
+			});
+	
+			this._accounts = newAccounts;
+
+			return this._accounts
+		} catch (err) {
+			console.error(err);
+			throw err;
+		}
+	},
+
+	addEthereumChain: async function(networkConfig: AddEthereumChainParameter): Promise<void> {
+		const ethereumApi = await this.api();
+
+		try {
+			await ethereumApi.request({
+				method: 'wallet_addEthereumChain',
+				params: [networkConfig],
+			});
+		} catch (err) {
+			throw err;
+		}
+	},
+
+	switchEthereumChain: async function(networkConfig: AddEthereumChainParameter): Promise<void> {
+		const ethereumApi = await this.api();
+
+		try {
+			await ethereumApi.request({
+				method: 'wallet_switchEthereumChain',
+				params: [{ chainId: networkConfig.chainId }],
+			});
+		} catch (err) {
+			throw err;
+		}
+	},
 
 	createContract: async function(wavesaddress: string, nodeUrl: string): Promise<IContractMeta> {
+		const ethereumApi = await this.api();
 		const ethersProvider = new ethers.providers.Web3Provider(ethereumApi, 'any');
 
 		const ethAddress = wavesAddress2eth(wavesaddress);
 		const url = `${nodeUrl}/eth/abi/${wavesaddress}`;
-		
+
 		// todo to node-api-js
 		const response = await fetch(url);
 		const data = await response.json();
-		
+
 		if(data.error) {
 			throw data;
 		}
@@ -79,89 +123,10 @@ const metamaskApi = {
 		};
 	},
 
-	requestAccounts: async function(): Promise<string[]> {
-		try {
-			const newAccounts = await ethereumApi.request({
-				method: 'eth_requestAccounts',
-			});
-
-			this._accounts = newAccounts;
-
-			return this._accounts;
-			// onRequest(newAccounts);
-		} catch (error) {
-			console.error(error);
-			throw 'Error requestAccounts';
-		}
-	},
-
-	//
-	getAccounts: async function(): Promise<EthereumAddress[]> {
-		try {
-			const newAccounts = await ethereumApi.request({
-				method: 'eth_accounts',
-			});
-	
-			this._accounts = newAccounts;
-
-			return this._accounts
-		} catch (err) {
-			console.error(err);
-			throw err;
-		}
-	},
-
-	// requestPermissions: async function() {
-	// 	try {
-	// 		const permissionsArray = await ethereumApi.request({
-	// 			method: 'wallet_requestPermissions',
-	// 			params: [{ eth_accounts: {} }],
-	// 		});
-	
-	// 		return permissionsArray;
-	// 	} catch (err) {
-	// 		console.error(err);
-	// 		throw err;
-	// 	}
-	// },
-
-	// getPermissions: async function() {
-	// 	try {
-	// 		const permissionsArray = await ethereumApi.request({
-	// 			method: 'wallet_getPermissions',
-	// 		});
-	
-	// 		return permissionsArray;
-	// 	} catch (err) {
-	// 		console.error(err);
-	// 		throw err;
-	// 	}
-	// },
-
-	addEthereumChain: async function(networkConfig: AddEthereumChainParameter): Promise<void> {
-		try {
-			await ethereumApi.request({
-				method: 'wallet_addEthereumChain',
-				params: [networkConfig],
-			});
-		} catch (err) {
-			throw err;
-		}
-	},
-
-	switchEthereumChain: async function(networkConfig: AddEthereumChainParameter): Promise<void> {
-		try {
-			await ethereumApi.request({
-				method: 'wallet_switchEthereumChain',
-				params: [{ chainId: networkConfig.chainId }],
-			});
-		} catch (err) {
-			throw err;
-		}
-	},
-
 	/* sendEIP1559 */
 	async transferWaves(recipient: EthereumAddress, amount: string): Promise<MetamaskSign> {
+		const ethereumApi = await this.api();
+
 		const WAVES_DECIMALS = 8;
 		const ethAmount = toEthereumAmount(Number(amount), WAVES_DECIMALS);
 		const amountInHex = `0x${ethAmount.toString(16)}`;
@@ -184,24 +149,47 @@ const metamaskApi = {
 		return result;
 	},
 
+	// async transferAsset(recipient: string, ethAssetId: string, amount: string): Promise<any> {
+	// 	const ethereumApi = await this.api();
+	// 	const from = this._accounts[0];
+	// 	const ethersProvider = new ethers.providers.Web3Provider(ethereumApi, 'any');
+
+	// 	const hstContract = new ethers.Contract(
+	// 		ethAssetId,
+	// 		ABI_TRANSFER_CUSTOM_TOKEN,
+	// 		ethersProvider.getSigner(),
+	// 	);
+
+	// 	const result = await hstContract.transfer(
+	// 		recipient,
+	// 		amount,
+	// 		{
+	// 		  from: from,
+	// 		}
+	// 	);
+
+	// 	return result;
+	// },
+
 	async transferAsset(recipient: string, ethAssetId: string, amount: string): Promise<any> {
+		const ethereumApi = await this.api();
 		const from = this._accounts[0];
 
 		const ethersProvider = new ethers.providers.Web3Provider(ethereumApi, 'any');
-	
-		const bankFactory = new ethers.Contract(
-			ethAssetId,
+
+		const hstFactory = new ethers.ContractFactory(
 			ABI_TRANSFER_CUSTOM_TOKEN,
+			BYTE_CODE,
 			ethersProvider.getSigner(),
 		);
 
-		const contract = await bankFactory.attach(recipient);
+		const contract = await hstFactory.attach(ethAssetId);
 
 		const result = await contract.transfer(
 			recipient,
 			amount,
 			{
-			  from: from,
+				from: from,
 			}
 		);
 
@@ -213,6 +201,7 @@ const metamaskApi = {
 	},
 
 	signTypedDataV4: async function(data: string): Promise<MetamaskSign> {
+		const ethereumApi = await this.api();
 		const from = this._accounts[0];
 
 		const sign = await ethereumApi.request({
@@ -224,6 +213,7 @@ const metamaskApi = {
 	},
 
 	signTypedData: async function(data: IAbiSignTypedDataModel): Promise<MetamaskSign> {
+		const ethereumApi = await this.api();
 		const from = this._accounts[0];
 
 		const sign = await ethereumApi.request({
@@ -234,7 +224,49 @@ const metamaskApi = {
 		return sign;
 	},
 
+	// getEncryptionPublicKey: async function(ethAddress) {
+	// 	try {
+	// 		const result = await ethereumApi.request({
+	// 			method: 'eth_getEncryptionPublicKey',
+	// 			params: [ethAddress],
+	// 		});
+	// 		return result;
+	// 	} catch (err) {
+	// 		throw err;
+	// 	}
+	// },
+
+	// requestPermissions: async function() {
+	// const ethereumApi = await this.api();
+	// 	try {
+	// 		const permissionsArray = await ethereumApi.request({
+	// 			method: 'wallet_requestPermissions',
+	// 			params: [{ eth_accounts: {} }],
+	// 		});
+
+	// 		return permissionsArray;
+	// 	} catch (err) {
+	// 		console.error(err);
+	// 		throw err;
+	// 	}
+	// },
+
+	// getPermissions: async function() {
+	// const ethereumApi = await this.api();
+	// 	try {
+	// 		const permissionsArray = await ethereumApi.request({
+	// 			method: 'wallet_getPermissions',
+	// 		});
+
+	// 		return permissionsArray;
+	// 	} catch (err) {
+	// 		console.error(err);
+	// 		throw err;
+	// 	}
+	// },
+
 	// sendTransaction: async function(transaction: any): Promise<MetamaskSign> {
+	// const ethereumApi = await this.api();
 	// 	const transactionParameters = {
 	// 		nonce: '0x00', // ignored by MetaMask
 	// 		gasPrice: '0x09184e72a000', // customizable by user during MetaMask confirmation.
