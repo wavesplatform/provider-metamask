@@ -11,7 +11,7 @@ const ETHEREUM_DECIMALS = 18;
 	// return assetId === null ? WAVES_ASSET_ID_CONVERTED : bytesToHexString(base58Decode(assetId));
 // };
 
-// export const publicKeyToBytes = (publicKey: string): string =>  {
+// export const publicKeyToBytes = (publicKey: string): string => {
 	// return bytesToHexString(base58Decode(publicKey));
 // };
 
