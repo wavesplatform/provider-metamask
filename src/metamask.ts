@@ -154,15 +154,13 @@ const metamaskApi = {
 	// 	const from = this._accounts[0];
 	// 	const ethersProvider = new ethers.providers.Web3Provider(ethereumApi, 'any');
 
-	// 	const bankFactory = new ethers.Contract(
+	// 	const hstContract = new ethers.Contract(
 	// 		ethAssetId,
 	// 		ABI_TRANSFER_CUSTOM_TOKEN,
 	// 		ethersProvider.getSigner(),
 	// 	);
 
-	// 	const contract = await bankFactory.attach(recipient);
-
-	// 	const result = await contract.transfer(
+	// 	const result = await hstContract.transfer(
 	// 		recipient,
 	// 		amount,
 	// 		{
@@ -191,9 +189,7 @@ const metamaskApi = {
 			recipient,
 			amount,
 			{
-			  from: from,
-			//   gasLimit: 10,
-			//   gasPrice: '100000',
+				from: from,
 			}
 		);
 
