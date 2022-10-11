@@ -215,31 +215,32 @@ export class ProviderMetamask implements Provider {
 	private async trySwitchNetwork() {
 		this.__log('trySwitchNetwork');
 
-		const networkConfig = getMetamaskNetworkConfig(this._connectOptions!.NETWORK_BYTE);
+		const networkConfig = getMetamaskNetworkConfig(this._connectOptions!);
 
-		if(networkConfig == null) {
+		if(networkConfig !== null) {
+			// metamask always try to add custom network, but not add mainnet stagenet testnet
+			await metamaskApi.addEthereumChain(networkConfig);
+
+			try {
+				this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain', networkConfig);
+				await metamaskApi.switchEthereumChain(networkConfig);
+			} catch (error) {
+				throw error;
+				// this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain :: error', error);
+				// switch (error.code) {
+				// 	case EMetamaskError.CHAIN_NOT_ADDED:
+				// 		this.__log('trySwitchNetwork :: metamaskApi.addEthereumChain', networkConfig);
+				// 		await metamaskApi.addEthereumChain(networkConfig);
+				// 		return;
+				// 	case EMetamaskError.REJECT_REQUEST:
+				// 		throw 'Switch to waves network is rejected';
+				// 	default:
+				// 		throw error;
+				// }
+			}
+		} else {
 			this.__log('trySwitchNetwork :: skiped');
 			return;
-		}
-
-		await metamaskApi.addEthereumChain(networkConfig);
-
-		try {
-			this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain', networkConfig);
-			await metamaskApi.switchEthereumChain(networkConfig);
-		} catch (error) {
-			throw error;
-			// this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain :: error', error);
-			// switch (error.code) {
-			// 	case EMetamaskError.CHAIN_NOT_ADDED:
-			// 		this.__log('trySwitchNetwork :: metamaskApi.addEthereumChain', networkConfig);
-			// 		await metamaskApi.addEthereumChain(networkConfig);
-			// 		return;
-			// 	case EMetamaskError.REJECT_REQUEST:
-			// 		throw 'Switch to waves network is rejected';
-			// 	default:
-			// 		throw error;
-			// }
 		}
 	}
 

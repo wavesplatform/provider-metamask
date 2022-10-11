@@ -4,7 +4,7 @@ import metamaskDetectProvider from '@metamask/detect-provider';
 import { wavesAddress2eth } from '@waves/node-api-js';
 
 import {
-	AddEthereumChainParameter,
+	IMetamaskNetworkConfig,
 	EthereumAddress,
 	IAbi,
 	IContractMeta,
@@ -67,7 +67,7 @@ const metamaskApi = {
 		}
 	},
 
-	addEthereumChain: async function(networkConfig: AddEthereumChainParameter): Promise<void> {
+	addEthereumChain: async function(networkConfig: IMetamaskNetworkConfig): Promise<void> {
 		const ethereumApi = await this.api();
 
 		try {
@@ -80,7 +80,7 @@ const metamaskApi = {
 		}
 	},
 
-	switchEthereumChain: async function(networkConfig: AddEthereumChainParameter): Promise<void> {
+	switchEthereumChain: async function(networkConfig: IMetamaskNetworkConfig): Promise<void> {
 		const ethereumApi = await this.api();
 
 		try {
@@ -98,10 +98,12 @@ const metamaskApi = {
 		const ethersProvider = new ethers.providers.Web3Provider(ethereumApi, 'any');
 
 		const ethAddress = wavesAddress2eth(wavesaddress);
-		const url = `${nodeUrl}/eth/abi/${wavesaddress}`;
+		const oUrl = new URL(nodeUrl);
+
+		oUrl.pathname = `/eth/abi/${wavesaddress}`;
 
 		// todo to node-api-js
-		const response = await fetch(url);
+		const response = await fetch(oUrl.toString());
 		const data = await response.json();
 
 		if(data.error) {

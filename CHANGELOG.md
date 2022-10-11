@@ -2,6 +2,9 @@
 
 provider-metamask changelog
 
+## [1.1.5]
+	- Fix: Check network by Byte and Url (custom network) [GT-1191]
+
 ## [1.1.4]
 	- Update: Use ethers.ContractFactory for transfer custom asset (reverted)
 	- Core: Use metamaskDetectProvider from @metamask/detect-provider
