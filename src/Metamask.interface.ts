@@ -54,7 +54,7 @@ export interface IMMTypedData {
 }
 
 // https://docs.metamask.io/guide/rpc-api.html#other-rpc-methods
-export interface AddEthereumChainParameter {
+export interface IMetamaskNetworkConfig {
 	chainId: string; // A 0x-prefixed hexadecimal string
 	chainName: string;
 	nativeCurrency: {
