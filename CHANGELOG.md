@@ -2,6 +2,9 @@
 
 provider-metamask changelog
 
+## [1.1.6]
+	- Fix: Change testnet url to https://nodes-testnet.wavesnodes.com
+
 ## [1.1.5]
 	- Fix: Check network by Byte and Url (custom network) [GT-1191]
 

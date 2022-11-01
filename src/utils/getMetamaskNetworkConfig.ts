@@ -41,7 +41,7 @@ const METAMASK_NETWORK_CONFIG_WAVES_TESTNET: IMetamaskNetworkConfig = {
 	chainId: '0x' + (84).toString(16),
 	chainName: 'Waves testnet',
 	nativeCurrency: { name: 'WAVES', symbol: 'WAVES', decimals: 18 },
-	rpcUrls: ['https://testnode1.wavesnodes.com/eth'],
+	rpcUrls: ['https://nodes-testnet.wavesnodes.com/eth'],
 	blockExplorerUrls: ['https://wavesexplorer.com/?network=testnet'],
 };
 
