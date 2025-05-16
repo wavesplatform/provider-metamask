@@ -11,7 +11,7 @@ import { ethAddress2waves, ethTxId2waves, wavesAddress2eth, wavesAsset2Eth } fro
 import { TRANSACTION_TYPE } from '@waves/ts-types';
 
 import { IUser, IProviderMetamaskConfig, IOrderData, EPriceMode } from './Provider.interface';
-import { IAbiOrderModel, MetamaskSign, IAbiSignTypedDataModel } from './Metamask.interface';
+import { IAbiOrderModel, MetamaskSign, IAbiSignTypedDataModel, EMetamaskError } from './Metamask.interface';
 import { DEFAULT_PROVIDER_CONFIG, DEFAULT_WAVES_CONFIG } from './config';
 import {
 	formatPayments,
@@ -218,28 +218,39 @@ export class ProviderMetamask implements Provider {
 		const networkConfig = getMetamaskNetworkConfig(this._connectOptions!);
 
 		if(networkConfig !== null) {
-			// metamask always try to add custom network, but not add mainnet stagenet testnet
-			await metamaskApi.addEthereumChain(networkConfig);
-
 			try {
 				this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain', networkConfig);
 				await metamaskApi.switchEthereumChain(networkConfig);
-			} catch (error) {
-				throw error;
-				// this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain :: error', error);
-				// switch (error.code) {
-				// 	case EMetamaskError.CHAIN_NOT_ADDED:
-				// 		this.__log('trySwitchNetwork :: metamaskApi.addEthereumChain', networkConfig);
-				// 		await metamaskApi.addEthereumChain(networkConfig);
-				// 		return;
-				// 	case EMetamaskError.REJECT_REQUEST:
-				// 		throw 'Switch to waves network is rejected';
-				// 	default:
-				// 		throw error;
-				// }
+			} catch (switchErr) {
+				// This error code indicates that the chain has not been added to MetaMask
+				if(
+					typeof switchErr === "object" &&
+					switchErr && "code" in switchErr &&
+					switchErr.code === EMetamaskError.CHAIN_NOT_ADDED
+				) {
+					try {
+						await metamaskApi.addEthereumChain(networkConfig);
+					} catch (addErr) {
+						this.__log('trySwitchNetwork :: metamaskApi.switchEthereumChain :: error', addErr);
+						console.error(addErr);
+
+						// Ignore the awkward error in the chrome browser extension
+						// TODO: delete
+						if(
+							typeof addErr === "object" &&
+							addErr && "code" in addErr &&
+							addErr.code === -32603 &&
+							addErr && "message" in addErr &&
+							addErr.message === "f is not a function"
+						) {
+							return;
+						}
+						throw addErr;
+					}
+				}
 			}
 		} else {
-			this.__log('trySwitchNetwork :: skiped');
+			this.__log('trySwitchNetwork :: skipped');
 			return;
 		}
 	}

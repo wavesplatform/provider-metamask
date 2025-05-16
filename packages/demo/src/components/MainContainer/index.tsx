@@ -8,10 +8,6 @@ interface IProps {
 	mainStore?: MainStore;
 }
 
-import { EChainId } from '@waves/ts-types';
-const mainnetChainId = 87;
-console.log(mainnetChainId, EChainId.MAINNET, EChainId.MAINNET === mainnetChainId);
-
 // const data2json = (data: any) => JSON.stringify(data, null, ' ');
 
 @inject('mainStore')

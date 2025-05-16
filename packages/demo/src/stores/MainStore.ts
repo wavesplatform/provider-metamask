@@ -83,7 +83,7 @@ class MainStore extends BaseStore {
 
 	@action async sendTransfer() {
 		const txData = JSON.parse(this.transferData!);
-
+		
 		await this.signer!.login();
 		const result = await this.signer!.transfer(txData).broadcast() as any;
 
